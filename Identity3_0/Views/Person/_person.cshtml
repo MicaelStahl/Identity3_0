@@ -1,0 +1,26 @@
+﻿@model Person
+@*
+    For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
+*@
+
+<tr class="d-table-row">
+    <td class="d-table-cell">@Model.FirstName @Model.LastName</td>
+    <td class="d-table-cell">@Model.Age</td>
+    <td class="d-table-cell">@Model.Email</td>
+    <td class="d-table-cell">@Model.PhoneNumber</td>
+    @if (Model.City == null)
+    {
+        <td class="d-table-cell">
+            Homeless
+        </td>
+    }
+    else
+    {
+        <td class="d-table-cell">
+            @Model.City
+        </td>
+    }
+    <td class="d-table-cell">
+        <partial name="_EDD_Buttons" model="@Model.Id" />
+    </td>
+</tr>
