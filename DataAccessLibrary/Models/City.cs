@@ -20,7 +20,7 @@ namespace Identity3_0.Models
         public string Population { get; set; }
 
         [Required]
-        [StringLength(8, MinimumLength = 4, ErrorMessage = "The postalcode cannot exceed 8 character-length nor be less than 4 character-length.")]
+        [StringLength(15, MinimumLength = 4, ErrorMessage = "The postalcode cannot exceed 8 character-length nor be less than 4 character-length.")]
         public string PostalCode { get; set; }
 
         public List<Person> People { get; set; }

@@ -12,19 +12,19 @@ namespace Identity3_0.Controllers
     [Route("[controller]/[action]")]
     public class PersonController : Controller
     {
-        private readonly ListApiController _list;
         private readonly IPersonRepository _service;
+        private readonly IGlobalRepository _list;
 
-        public PersonController(ListApiController list, IPersonRepository service)
+        public PersonController(IPersonRepository service, IGlobalRepository list)
         {
-            _list = list;
             _service = service;
+            _list = list;
         }
 
         /// <summary>
         /// Converts an enum object to it's string representative.
         /// </summary>
-        private string ConvertEnumToString(ActionMessages message)
+        protected string ConvertEnumToString(ActionMessages message)
         {
             return Enum.GetName(typeof(ActionMessages), message);
         }
@@ -41,14 +41,14 @@ namespace Identity3_0.Controllers
             return View(await _list.GetPeople());
         }
 
-        [HttpGet]
-        public async Task<IActionResult> People(ActionMessages message = ActionMessages.Success) // if nothing else is stated it gets the value of Success.
-        {
-            // Using discard "_" to create a simple lambda expression depending what the message variable is.
-            _ = message == ActionMessages.Success ? null : ViewBag.message = ConvertEnumToString(message);
+        //[HttpGet]
+        //public async Task<IActionResult> People(ActionMessages message = ActionMessages.Success) // if nothing else is stated it gets the value of Success.
+        //{
+        //    // Using discard "_" to create a simple lambda expression depending what the message variable is.
+        //    _ = message == ActionMessages.Success ? null : ViewBag.message = ConvertEnumToString(message);
 
-            return View(await _list.GetPeople());
-        }
+        //    return View(await _list.GetPeople());
+        //}
 
         [HttpGet]
         public async Task<IActionResult> Create()

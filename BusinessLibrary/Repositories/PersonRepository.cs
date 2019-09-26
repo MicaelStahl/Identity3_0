@@ -87,7 +87,7 @@ namespace Identity3_0.Repositories
             try
             {
                 var people = await _db.People
-                    .Include(x=>x.City)
+                    .Include(x => x.City)
                     .ToListAsync();
 
                 if (people == null || people.Count == 0)

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Identity3_0.Database;
+using Identity3_0.Interfaces;
+using Identity3_0.Repositories;
 using Identity3_0.ViewModels;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -32,6 +34,9 @@ namespace Identity3_0
             {
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
             });
+
+            services.AddScoped<IPersonRepository, PersonRepository>();
+            services.AddScoped<IGlobalRepository, GlobalRepository>();
 
             services.AddIdentity<AppUser, IdentityRole>()
                 .AddEntityFrameworkStores<Identity3_0DbContext>()
