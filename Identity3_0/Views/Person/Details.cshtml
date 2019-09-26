@@ -1,0 +1,44 @@
+﻿@model Person
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1>Details of @Model.FirstName</h1>
+<hr />
+<partial name="_GoBackButton" />
+
+<div class="shadow border mt-3 col-3">
+    <div class="form-group">
+        <label class="font-weight-bold"><ins>Full name</ins></label>
+        <div>@Model.FirstName @Model.LastName</div>
+    </div>
+    <div class="form-group">
+        <label class="font-weight-bold"><ins>Age</ins></label>
+        <div>@Model.Age</div>
+    </div>
+    <div class="form-group">
+        <label class="font-weight-bold"><ins>Phonenumber</ins></label>
+        <div>@Model.PhoneNumber</div>
+    </div>
+    <div class="form-group">
+        <label class="font-weight-bold"><ins>Email</ins></label>
+        <div>@Model.Email</div>
+    </div>
+    <div class="form-group">
+        <label class="font-weight-bold"><ins>City</ins></label>
+        @if (Model.City == null)
+        {
+            <div>Homeless</div>
+        }
+        else
+        {
+            <div>@Model.City.Name</div>
+        }
+    </div>
+
+    <hr />
+
+    <div class="btn-group">
+        <partial name="_ED_Buttons" model="@Model.Id" />
+    </div>
+</div>

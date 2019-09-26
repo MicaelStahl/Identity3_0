@@ -22,7 +22,7 @@ namespace Identity3_0.Models
         public string LastName { get; set; }
 
         [Required]
-        [Range(1, 110, ErrorMessage = "The age cannot be greater than 110, nor be less than 1.")]
+        [Range(0, 110, ErrorMessage = "The age cannot be greater than 110.")]
         public int Age { get; set; }
 
         [Required]

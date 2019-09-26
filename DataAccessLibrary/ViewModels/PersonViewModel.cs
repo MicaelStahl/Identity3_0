@@ -26,5 +26,14 @@ namespace Identity3_0.ViewModels
     public class PersonUpdate : CityListWithMessage
     {
         public Person Person { get; set; }
+
+        public Guid CityId { get; set; }
+    }
+
+    public class PersonCreate
+    {
+        public Person Person { get; set; }
+
+        public Guid CityId { get; set; }
     }
 }

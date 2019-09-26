@@ -4,8 +4,6 @@ using Identity3_0.Models;
 using Identity3_0.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Identity3_0.Repositories
@@ -21,11 +19,11 @@ namespace Identity3_0.Repositories
             _db = db;
         }
 
-        #endregion
+        #endregion D.I
 
         #region Create
 
-        public async Task<ActionMessages> Create(Person person)
+        public async Task<ActionMessages> Create(Person person, Guid cityId)
         {
             try
             {
@@ -40,7 +38,9 @@ namespace Identity3_0.Repositories
                     return ActionMessages.InvalidAge;
                 }
 
-                await _db.People.AddAsync(person);
+                //var per = person.Person; // Doing this to shorten the text for readability.
+
+                await _db.People.AddAsync(new Person { FirstName = person.FirstName, LastName = person.LastName, Age = person.Age, Email = person.Email, PhoneNumber = person.PhoneNumber, City = await _db.Cities.SingleOrDefaultAsync(x => x.Id == cityId) });
 
                 await _db.SaveChangesAsync();
 
@@ -52,7 +52,7 @@ namespace Identity3_0.Repositories
             }
         }
 
-        #endregion
+        #endregion Create
 
         #region Find
 
@@ -66,7 +66,7 @@ namespace Identity3_0.Repositories
                 }
 
                 var person = await _db.People
-                    .Include(x=>x.City)
+                    .Include(x => x.City)
                     .SingleOrDefaultAsync(x => x.Id == id);
 
                 if (person == null)
@@ -103,7 +103,7 @@ namespace Identity3_0.Repositories
             }
         }
 
-        #endregion
+        #endregion Find
 
         #region Edit
 
@@ -146,7 +146,7 @@ namespace Identity3_0.Repositories
             }
         }
 
-        #endregion
+        #endregion Edit
 
         #region Delete
 
@@ -178,6 +178,6 @@ namespace Identity3_0.Repositories
             }
         }
 
-        #endregion
+        #endregion Delete
     }
 }

@@ -29,26 +29,15 @@ namespace Identity3_0.Controllers
             return Enum.GetName(typeof(ActionMessages), message);
         }
 
-        /// <summary>
-        /// Doesn't contain any direct information other than text.
-        /// </summary>
-        /// <returns></returns>
-        public async Task<IActionResult> Index(ActionMessages message = ActionMessages.Success) // if nothing else is stated it gets the value of Success.
+        public async Task<IActionResult> Index(string message = null) // if nothing else is stated it gets the value of Success.
         {
             // Using discard "_" to create a simple lambda expression depending what the message variable is.
-            _ = message == ActionMessages.Success ? null : ViewBag.message = ConvertEnumToString(message);
+            //_ = message == ActionMessages.Success ? null : ViewBag.message = ConvertEnumToString(message);
+            if (!string.IsNullOrWhiteSpace(message))
+                ViewBag.message = message;
 
             return View(await _list.GetPeople());
         }
-
-        //[HttpGet]
-        //public async Task<IActionResult> People(ActionMessages message = ActionMessages.Success) // if nothing else is stated it gets the value of Success.
-        //{
-        //    // Using discard "_" to create a simple lambda expression depending what the message variable is.
-        //    _ = message == ActionMessages.Success ? null : ViewBag.message = ConvertEnumToString(message);
-
-        //    return View(await _list.GetPeople());
-        //}
 
         [HttpGet]
         public async Task<IActionResult> Create()
@@ -57,24 +46,26 @@ namespace Identity3_0.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(Person person)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(Person person, Guid CityId)
         {
             try
             {
                 if (!ModelState.IsValid)
                 {
-                    throw new Exception("Please checks all fields and try again.");
+                    ModelState.AddModelError(string.Empty, ConvertEnumToString(ActionMessages.FillAllFields));
+                    throw new ArgumentNullException();
                 }
 
-                var result = await _service.Create(person);
+                var result = await _service.Create(person, CityId);
 
                 if (result == ActionMessages.Created)
                 {
-                    return RedirectToAction(nameof(Index), new { message = result });
+                    return RedirectToAction(nameof(Index), "Person", new { message = ConvertEnumToString(ActionMessages.Created) });
                 }
                 else if (result == ActionMessages.NotFound)
                 {
-                    ModelState.AddModelError(string.Empty, ConvertEnumToString(result));
+                    ModelState.AddModelError(string.Empty, ConvertEnumToString(ActionMessages.NotFound));
 
                     return NotFound(ModelState);
                 }
@@ -83,7 +74,11 @@ namespace Identity3_0.Controllers
                     throw new Exception(Enum.GetName(typeof(ActionMessages), result));
                 }
             }
-            catch (Exception ex)
+            catch (ArgumentNullException) // Catches the exception thrown if the modelstate was invalid.
+            {
+                return BadRequest(ModelState);
+            }
+            catch (Exception ex) // Catches all other exceptions thrown.
             {
                 return BadRequest(ex.Message);
             }
@@ -169,7 +164,7 @@ namespace Identity3_0.Controllers
 
                 if (result == ActionMessages.Updated)
                 {
-                    return RedirectToAction(nameof(Index), new { message = result });
+                    return RedirectToAction(nameof(Index), new { message = ConvertEnumToString(result) });
                 }
                 else if (result == ActionMessages.NotFound)
                 {
@@ -235,7 +230,7 @@ namespace Identity3_0.Controllers
 
                 if (result == ActionMessages.Deleted)
                 {
-                    return RedirectToAction(nameof(Index), new { message = result });
+                    return RedirectToAction(nameof(Index), new { message = ConvertEnumToString(result) });
                 }
                 else if (result == ActionMessages.NotFound)
                 {

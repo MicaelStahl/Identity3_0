@@ -29,7 +29,7 @@ namespace Identity3_0
                 _roleManager.CreateAsync(role).Wait();
             }
 
-            #endregion
+            #endregion Role Creation
 
             #region User Creation
 
@@ -77,7 +77,7 @@ namespace Identity3_0
                 }
             }
 
-            #endregion
+            #endregion User Creation
 
             #region Person Creation
 
@@ -94,16 +94,15 @@ namespace Identity3_0
                 new Person { Id = Guid.NewGuid(), FirstName = "Test", LastName = "4", Age = DateTime.Now.Year - 2004, Email = "Test4@context.com", PhoneNumber = "123456789" },
                 new Person { Id = Guid.NewGuid(), FirstName = "Test", LastName = "5", Age = DateTime.Now.Year - 2017, Email = "Test5@context.com", PhoneNumber = "123456789" },
                 new Person { Id = Guid.NewGuid(), FirstName = "Test", LastName = "6", Age = DateTime.Now.Year - 1953, Email = "Test6@context.com", PhoneNumber = "123456789" },
-                new Person { Id = Guid.NewGuid(), FirstName = "Test", LastName = "7", Age = DateTime.Now.Year - 2017, Email = "Test5@context.com", PhoneNumber = "123456789" },
-                new Person { Id = Guid.NewGuid(), FirstName = "Test", LastName = "8", Age = DateTime.Now.Year - 2017, Email = "Test5@context.com", PhoneNumber = "123456789" },
-
+                new Person { Id = Guid.NewGuid(), FirstName = "Test", LastName = "7", Age = DateTime.Now.Year - 2017, Email = "Test7@context.com", PhoneNumber = "123456789" },
+                new Person { Id = Guid.NewGuid(), FirstName = "Test", LastName = "8", Age = DateTime.Now.Year - 2017, Email = "Test8@context.com", PhoneNumber = "123456789" },
             };
 
             context.People.AddRange(people);
 
             context.SaveChanges();
 
-            #endregion
+            #endregion Person Creation
 
             #region City Creation
 
@@ -124,7 +123,7 @@ namespace Identity3_0
 
             context.SaveChanges();
 
-            #endregion
+            #endregion City Creation
 
             #region Country Creation
 
@@ -132,14 +131,13 @@ namespace Identity3_0
             {
                 new Country { Id = Guid.NewGuid(), Name = "Country1", Population = "1239875" , Cities = new City[] { cities[0], cities[1] }.ToList() },
                 new Country { Id = Guid.NewGuid(), Name = "Country1", Population = "1239875" , Cities = new City[] { cities[2], cities[3] }.ToList() },
-
             };
 
             context.Countries.AddRange(countries);
 
             context.SaveChanges();
 
-            #endregion
+            #endregion Country Creation
         }
     }
 }

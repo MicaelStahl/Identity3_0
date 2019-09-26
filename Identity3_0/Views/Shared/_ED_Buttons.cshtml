@@ -1,0 +1,7 @@
+﻿@model Guid
+@*
+    For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
+*@
+
+@{ /* &nbsp; == A space. This means Hello&nbsp;World becomes Hello World. */}
+<a asp-route-id="@Model" asp-action="Edit">Edit</a> &nbsp; | &nbsp; <a asp-route-id="@Model" asp-action="Delete">Delete</a>
