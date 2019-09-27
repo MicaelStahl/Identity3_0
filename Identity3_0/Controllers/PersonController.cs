@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Identity3_0.Interfaces;
 using Identity3_0.Models;
@@ -14,11 +15,13 @@ namespace Identity3_0.Controllers
     {
         private readonly IPersonRepository _service;
         private readonly IGlobalRepository _list;
+        private readonly DictionaryMessages _dictionary;
 
         public PersonController(IPersonRepository service, IGlobalRepository list)
         {
             _service = service;
             _list = list;
+            _dictionary = new DictionaryMessages();
         }
 
         /// <summary>
@@ -26,7 +29,9 @@ namespace Identity3_0.Controllers
         /// </summary>
         protected string ConvertEnumToString(ActionMessages message)
         {
-            return Enum.GetName(typeof(ActionMessages), message);
+            return _dictionary.Messages.FirstOrDefault(x => x.Key == (int)message).Value.Replace('_', ' ');
+            //return test.Value;
+            //return Enum.GetName(typeof(ActionMessages), message);
         }
 
         public async Task<IActionResult> Index(string message = null) // if nothing else is stated it gets the value of Success.
@@ -61,7 +66,7 @@ namespace Identity3_0.Controllers
 
                 if (result == ActionMessages.Created)
                 {
-                    return RedirectToAction(nameof(Index), "Person", new { message = ConvertEnumToString(ActionMessages.Created) });
+                    return RedirectToAction(nameof(Index), "Person", new { message = ConvertEnumToString(result) });
                 }
                 else if (result == ActionMessages.NotFound)
                 {
@@ -150,7 +155,8 @@ namespace Identity3_0.Controllers
             }
         }
 
-        [HttpPut]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(Person person)
         {
             try
@@ -164,7 +170,7 @@ namespace Identity3_0.Controllers
 
                 if (result == ActionMessages.Updated)
                 {
-                    return RedirectToAction(nameof(Index), new { message = ConvertEnumToString(result) });
+                    return RedirectToAction(nameof(Index), "Person", new { message = ConvertEnumToString(result) });
                 }
                 else if (result == ActionMessages.NotFound)
                 {
@@ -216,9 +222,10 @@ namespace Identity3_0.Controllers
             }
         }
 
-        [HttpDelete("Delete")]
+        [HttpPost("Delete")]
+        [AutoValidateAntiforgeryToken]
         public async Task<IActionResult> DeleteConfirmed(Guid id)
-        {
+        { 
             try
             {
                 if (id == Guid.Empty)
@@ -230,7 +237,7 @@ namespace Identity3_0.Controllers
 
                 if (result == ActionMessages.Deleted)
                 {
-                    return RedirectToAction(nameof(Index), new { message = ConvertEnumToString(result) });
+                    return RedirectToAction(nameof(Index), "Person", new { message = ConvertEnumToString(result) }) ;
                 }
                 else if (result == ActionMessages.NotFound)
                 {

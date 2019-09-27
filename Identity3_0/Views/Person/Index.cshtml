@@ -8,41 +8,41 @@
 <partial name="_CreateButton" />
 
 <div class="container shadow border mt-3">
-    @if (ViewBag.message != null)
-    {
-        if (ViewBag.message.Contains("successfully"))
+    @*@if (ViewBag.message != null) --- Fix this later. ---
         {
-    <div class="text-success font-weight-bold">@ViewBag.message</div>
-        }
-        else
-        {
-    <div class="text-danger font-weight-bold">@ViewBag.message</div>
-        }
-    }
+            if (ViewBag.message.Contains("Created"))
+            {
+                <div class="text-success font-weight-bold">@ViewBag.message</div>
+            }
+            else
+            {
+                <div class="text-danger font-weight-bold">@ViewBag.message</div>
+            }
+        }*@
     @if (Model.Count == 0)
     {
-    <div class="text-danger font-weight-bold">No people are available. Please try again later.</div>
+        <div class="text-danger font-weight-bold">No people are available. Please try again later.</div>
     }
     else
     {
-    <table class="table table-active table-striped table-hover rounded">
-        <caption>List of all people</caption>
-        <thead>
-            <tr class="d-table-row">
-                <th class="d-table-cell">Name</th>
-                <th class="d-table-cell">Age</th>
-                <th class="d-table-cell">Email</th>
-                <th class="d-table-cell">Phonenumber</th>
-                <th class="d-table-cell">City</th>
-                <th class="d-table-cell">Options</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model)
+        <table class="table table-active table-striped table-hover rounded">
+            <caption>List of all people</caption>
+            <thead>
+                <tr class="d-table-row">
+                    <th class="d-table-cell">Name</th>
+                    <th class="d-table-cell">Age</th>
+                    <th class="d-table-cell">Email</th>
+                    <th class="d-table-cell">Phonenumber</th>
+                    <th class="d-table-cell">City</th>
+                    <th class="d-table-cell">Options</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
                 {
-            <partial name="_person" model="item" />
+                    <partial name="_person" model="item" />
                 }
-        </tbody>
-    </table>
+            </tbody>
+        </table>
     }
 </div>

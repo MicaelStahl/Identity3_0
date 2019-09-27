@@ -78,5 +78,21 @@ namespace Identity3_0.ViewModels
         public ActionMessages Message { get; set; }
     }
 
+    public class DictionaryMessages
+    {
+        public Dictionary<int, string> Messages { get; set; } = EnumToDictionary();
+
+        /// <summary>
+        /// Converts the ActionMessages enum to a dictionary.
+        /// </summary>
+        /// <returns></returns>
+        private static Dictionary<int, string> EnumToDictionary()
+        {
+            return Enum.GetValues(typeof(ActionMessages))
+                    .Cast<ActionMessages>()
+                    .ToDictionary(t => (int)t, t => Enum.GetName(typeof(ActionMessages), t));
+        }
+    }
+
     #endregion
 }
