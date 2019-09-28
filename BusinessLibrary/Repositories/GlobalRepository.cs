@@ -25,7 +25,7 @@ namespace Identity3_0.Repositories
 
         public async Task<List<City>> GetCities()
         {
-            return await _db.Cities.ToListAsync();
+            return await _db.Cities.Include(x=>x.Country).ToListAsync();
         }
 
         public async Task<List<Country>> GetCountries()
@@ -35,7 +35,7 @@ namespace Identity3_0.Repositories
 
         public async Task<List<Person>> GetPeople()
         {
-            return await _db.People.ToListAsync();
+            return await _db.People.Include(x=>x.City).ToListAsync();
         }
     }
 }

@@ -196,7 +196,8 @@ namespace Identity3_0.Controllers
             {
                 if (id == Guid.Empty)
                 {
-                    throw new Exception("Something went wrong.");
+                    ModelState.AddModelError(string.Empty, "Something went wrong.");
+                    throw new Exception(ModelState.ValidationState.ToString());
                 }
 
                 var result = await _service.Find(id);
@@ -222,8 +223,8 @@ namespace Identity3_0.Controllers
             }
         }
 
-        [HttpPost("Delete")]
-        [AutoValidateAntiforgeryToken]
+        [HttpPost, ActionName("Delete")]
+        //[ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         { 
             try
