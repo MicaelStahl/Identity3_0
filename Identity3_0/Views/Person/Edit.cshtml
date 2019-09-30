@@ -3,12 +3,17 @@
     ViewData["Title"] = "Create";
 }
 
-<h1>Create new Person</h1>
+@{
+    var activeCity = Model.Person.City ?? null;
+}
+
+
+<h1>Editing @Model.Person.FirstName</h1>
 <hr />
 <partial name="_GoBackButton" />
 
 <div class="shadow border col-3 mt-3">
-    <form asp-action="Create" asp-controller="Person" method="post">
+    <form asp-action="Edit" asp-controller="Person" method="post">
         @Html.AntiForgeryToken()
         <div asp-validation-summary="All" class="text-danger font-weight-bold"></div>
         <div class="form-group">
@@ -39,12 +44,16 @@
         <div class="form-group">
             <label asp-for="Person.City" class="control-label"></label>
             <select asp-for="CityId" class="form-control">
+                @if (activeCity != null)
+                {
+                    <option value="@activeCity.Id">@activeCity.Name</option>
+                }
 
                 <option value="@null">Homeless</option>
 
-                @if (Model.Cities != null || Model.Cities.Count != 0)
+                @foreach (var item in Model.Cities)
                 {
-                    foreach (var item in Model.Cities)
+                    if (item != activeCity)
                     {
                         <option value="@item.Id">@item.Name</option>
                     }

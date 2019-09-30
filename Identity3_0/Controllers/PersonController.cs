@@ -36,10 +36,8 @@ namespace Identity3_0.Controllers
 
         public async Task<IActionResult> Index(string message = null) // if nothing else is stated it gets the value of Success.
         {
-            // Using discard "_" to create a simple lambda expression depending what the message variable is.
-            //_ = message == ActionMessages.Success ? null : ViewBag.message = ConvertEnumToString(message);
             if (!string.IsNullOrWhiteSpace(message))
-                ViewBag.message = message;
+                ViewBag.message = $"The requested person was successfully {message.ToLower()}!";
 
             return View(await _list.GetPeople());
         }
@@ -52,7 +50,7 @@ namespace Identity3_0.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Person person, Guid CityId)
+        public async Task<IActionResult> Create(Person person, Guid? CityId)
         {
             try
             {
@@ -157,7 +155,7 @@ namespace Identity3_0.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Person person)
+        public async Task<IActionResult> Edit(Person person, Guid? CityId)
         {
             try
             {
@@ -166,7 +164,7 @@ namespace Identity3_0.Controllers
                     throw new Exception("Please check all fields and try again.");
                 }
 
-                var result = await _service.Edit(person);
+                var result = await _service.Edit(person, CityId);
 
                 if (result == ActionMessages.Updated)
                 {
@@ -224,9 +222,9 @@ namespace Identity3_0.Controllers
         }
 
         [HttpPost, ActionName("Delete")]
-        //[ValidateAntiForgeryToken]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(Guid id)
-        { 
+        {
             try
             {
                 if (id == Guid.Empty)
@@ -238,7 +236,7 @@ namespace Identity3_0.Controllers
 
                 if (result == ActionMessages.Deleted)
                 {
-                    return RedirectToAction(nameof(Index), "Person", new { message = ConvertEnumToString(result) }) ;
+                    return RedirectToAction(nameof(Index), "Person", new { message = ConvertEnumToString(result) });
                 }
                 else if (result == ActionMessages.NotFound)
                 {

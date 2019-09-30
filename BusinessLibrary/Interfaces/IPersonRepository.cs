@@ -9,13 +9,13 @@ namespace Identity3_0.Interfaces
 {
     public interface IPersonRepository
     {
-        Task<ActionMessages> Create(Person person, Guid cityId);
+        Task<ActionMessages> Create(Person person, Guid? cityId);
 
         Task<PersonWithMessage> Find(Guid id);
 
         Task<PersonListWithMessage> FindAll();
 
-        Task<ActionMessages> Edit(Person person);
+        Task<ActionMessages> Edit(Person person, Guid? cityId);
 
         Task<ActionMessages> Delete(Guid id);
     }

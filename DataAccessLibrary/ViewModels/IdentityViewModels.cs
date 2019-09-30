@@ -31,13 +31,13 @@ namespace Identity3_0.ViewModels
         [EmailAddress]
         [Display(Name = "Email")]
         [DataType(DataType.EmailAddress)]
-        public override string Email { get; set; }
+        public override string Email { get; set; } // Overriding to get the email the way I want it.
 
         [Required]
         [Phone]
         [Display(Name = "Phonenumber")]
         [DataType(DataType.PhoneNumber)]
-        public override string PhoneNumber { get; set; }
+        public override string PhoneNumber { get; set; } // Overriding to get the phonenumber the way I want it.
 
         /// <summary>
         /// Indicates whether the user is an admin or not.

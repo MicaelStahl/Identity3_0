@@ -23,7 +23,7 @@ namespace Identity3_0.Repositories
 
         #region Create
 
-        public async Task<ActionMessages> Create(Person person, Guid cityId)
+        public async Task<ActionMessages> Create(Person person, Guid? cityId)
         {
             try
             {
@@ -38,9 +38,7 @@ namespace Identity3_0.Repositories
                     return ActionMessages.InvalidAge;
                 }
 
-                //var per = person.Person; // Doing this to shorten the text for readability.
-
-                await _db.People.AddAsync(new Person { FirstName = person.FirstName, LastName = person.LastName, Age = person.Age, Email = person.Email, PhoneNumber = person.PhoneNumber, City = await _db.Cities.SingleOrDefaultAsync(x => x.Id == cityId) });
+                await _db.People.AddAsync(new Person { FirstName = person.FirstName, LastName = person.LastName, Age = person.Age, Email = person.Email, PhoneNumber = person.PhoneNumber, City = await _db.Cities.SingleOrDefaultAsync(x => x.Id == cityId) ?? null });
 
                 await _db.SaveChangesAsync();
 
@@ -107,7 +105,7 @@ namespace Identity3_0.Repositories
 
         #region Edit
 
-        public async Task<ActionMessages> Edit(Person person)
+        public async Task<ActionMessages> Edit(Person person, Guid? cityId)
         {
             try
             {
@@ -121,6 +119,8 @@ namespace Identity3_0.Repositories
                 {
                     return ActionMessages.InvalidAge;
                 }
+
+                person.City = await _db.Cities.SingleOrDefaultAsync(x => x.Id == cityId) ?? null;
 
                 var original = await _db.People.SingleOrDefaultAsync(x => x.Id == person.Id);
 

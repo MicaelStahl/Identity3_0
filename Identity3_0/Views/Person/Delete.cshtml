@@ -40,7 +40,7 @@
 
     <div class="btn-group mb-2">
         <form asp-action="Delete" asp-controller="Person" asp-route-id="@Model.Id">
-            @*@Html.AntiForgeryToken()*@
+            @Html.AntiForgeryToken()
         <input type="submit" class="btn btn-danger" value="Delete" />
         </form>
         &nbsp; | &nbsp;
