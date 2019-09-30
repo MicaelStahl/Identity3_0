@@ -16,6 +16,7 @@
     <form asp-action="Edit" asp-controller="Person" method="post">
         @Html.AntiForgeryToken()
         <div asp-validation-summary="All" class="text-danger font-weight-bold"></div>
+        <input type="hidden" asp-for="Person.Id" />
         <div class="form-group">
             <label asp-for="Person.FirstName" class="control-label"></label>
             <input asp-for="Person.FirstName" class="form-control" autofocus />

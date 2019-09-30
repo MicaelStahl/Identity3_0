@@ -37,7 +37,8 @@
                         }
                     </ul>
                     <ul class="navbar-nav ml-auto">
-                        @if (User.Identity.IsAuthenticated)
+                        <partial name="_LoginPartial" />
+                        @*@if (User.Identity.IsAuthenticated)
                         {
                             if (User.IsInRole("Administrator"))
                             {
@@ -54,7 +55,7 @@
                             <li class="nav-item">
                                 <a class="nav-link btn text-dark" asp-controller="Account" asp-action="SignIn"><i class="fa fa-user"></i> Sign in</a>
                             </li>
-                        }
+                        }*@
                     </ul>
                 </div>
             </div>

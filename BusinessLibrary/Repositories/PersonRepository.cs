@@ -120,9 +120,9 @@ namespace Identity3_0.Repositories
                     return ActionMessages.InvalidAge;
                 }
 
-                person.City = await _db.Cities.SingleOrDefaultAsync(x => x.Id == cityId) ?? null;
+                person.City = await _db.Cities.SingleOrDefaultAsync(x => x.Id == cityId);
 
-                var original = await _db.People.SingleOrDefaultAsync(x => x.Id == person.Id);
+                var original = await _db.People.Include(x=>x.City).SingleOrDefaultAsync(x => x.Id == person.Id);
 
                 if (original == null)
                 {

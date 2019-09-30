@@ -85,14 +85,14 @@ namespace MVC_Identity.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        public IActionResult Create() // Register
+        public IActionResult Register() // Register
         {
             return View();
         }
 
         [HttpPost]
         [AllowAnonymous]
-        public async Task<IActionResult> Create(RegisterUser user)
+        public async Task<IActionResult> Register(RegisterUser user)
         {
             try
             {
@@ -136,5 +136,10 @@ namespace MVC_Identity.Controllers
 
         #endregion
 
+        #region Find
+
+
+
+        #endregion
     }
 }
