@@ -1,7 +1,8 @@
 ﻿@inject SignInManager<AppUser> _signInManager
 @*@inject UserManager<AppUser> _userManager*@
 
-@if (_signInManager.IsSignedIn(User))
+@*@if (_signInManager.IsSignedIn(User))*@ @* Use this later, used with Claims. *@
+@if (User.Identity.IsAuthenticated)
 {
     <li class="nav-item">
         <a asp-action="Profile" asp-controller="Account" class="nav-link btn text-dark">Hello @User.Identity.Name!</a>

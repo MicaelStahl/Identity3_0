@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Identity3_0.ViewModels;
+﻿using Identity3_0.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace MVC_Identity.Controllers
 {
@@ -15,7 +14,6 @@ namespace MVC_Identity.Controllers
     [Authorize]
     public class AccountController : Controller
     {
-
         #region D.I
 
         private readonly UserManager<AppUser> _userManager;
@@ -27,8 +25,8 @@ namespace MVC_Identity.Controllers
             _signInManager = signInManager;
         }
 
-        #endregion
-        
+        #endregion D.I
+
         public IActionResult Index()
         {
             return View();
@@ -49,14 +47,14 @@ namespace MVC_Identity.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                return View();
             }
 
             var result = await _signInManager.PasswordSignInAsync(user.Email, user.Password, false, false);
 
             if (result.Succeeded)
             {
-                return LocalRedirect(nameof(Index));
+                return RedirectToAction(nameof(Index), "Home");
             }
             else if (result.IsLockedOut)
             {
@@ -76,16 +74,16 @@ namespace MVC_Identity.Controllers
         {
             await _signInManager.SignOutAsync();
 
-            return LocalRedirect(nameof(Index));
+            return RedirectToAction(nameof(Index), "Home");
         }
 
-        #endregion
+        #endregion SignIn / SignOut
 
         #region Create
 
         [HttpGet]
         [AllowAnonymous]
-        public IActionResult Register() // Register
+        public IActionResult Register()
         {
             return View();
         }
@@ -99,15 +97,20 @@ namespace MVC_Identity.Controllers
                 if (!ModelState.IsValid)
                 {
                     ModelState.AddModelError(string.Empty, "Please fill all fields and try again.");
-                    throw new Exception();
+
+                    return View();
                 }
 
                 if (await _userManager.FindByEmailAsync(user.Email) != null)
                 {
-                    return BadRequest("The Email is already in use.");
+                    ModelState.AddModelError(string.Empty, "The Email is already in use.");
+
+                    ViewBag.error = "The Email is already in use.";
+
+                    return View();
                 }
 
-                user.UserName = user.Email;
+                //user.UserName = user.Email; // Should in theory not be needed considering the configuration for AppUser.
 
                 var result = await _userManager.CreateAsync(user, user.Password);
 
@@ -115,7 +118,12 @@ namespace MVC_Identity.Controllers
                 {
                     // Send an email verification here later.
 
-                    return LocalRedirect(nameof(Index));
+                    // Checks if the IsAdmin value is true and adds the user to the administrator role if it is.
+                    var roleResult = user.IsAdmin ?
+                        await _userManager.AddToRolesAsync(user, new List<string> { "Administrator", "NormalUser" }) :
+                        await _userManager.AddToRoleAsync(user, "NormalUser");
+
+                    return LocalRedirect(nameof(SignIn)); // Redirect to SignIn so user can sign in.
                 }
                 else
                 {
@@ -126,7 +134,6 @@ namespace MVC_Identity.Controllers
 
                     throw new Exception();
                 }
-
             }
             catch (Exception)
             {
@@ -134,12 +141,152 @@ namespace MVC_Identity.Controllers
             }
         }
 
-        #endregion
+        #endregion Create
 
         #region Find
 
+        [HttpGet]
+        public async Task<IActionResult> Profile(string id)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                ModelState.AddModelError(string.Empty, "Something went wrong.");
 
+                return BadRequest(ModelState);
+            }
 
-        #endregion
+            var user = await _userManager.FindByIdAsync(id);
+
+            if (user == null)
+            {
+                ModelState.AddModelError(string.Empty, "Could not find the requested user.");
+
+                return NotFound(ModelState);
+            }
+
+            return View(new FrontUser { Id = user.Id, FirstName = user.FirstName, LastName = user.LastName, Age = user.Age, Email = user.Email, IsAdmin = user.IsAdmin, PhoneNumber = user.PhoneNumber });
+        }
+
+        #endregion Find
+
+        #region Edit
+
+        [HttpGet]
+        public async Task<IActionResult> Edit(string id)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                ModelState.AddModelError(string.Empty, "Something went wrong.");
+
+                return BadRequest(ModelState);
+            }
+
+            var user = await _userManager.FindByIdAsync(id);
+
+            if (user == null)
+            {
+                ModelState.AddModelError(string.Empty, "Could not find the requested user.");
+
+                return NotFound(ModelState);
+            }
+
+            return View(new FrontUser { Id = user.Id, FirstName = user.FirstName, LastName = user.LastName, Age = user.Age, Email = user.Email, IsAdmin = user.IsAdmin, PhoneNumber = user.PhoneNumber });
+        }
+
+        /// <summary>
+        /// Expand this Edit to be more dynamic for specifically Email, Password etc.
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public async Task<IActionResult> Edit(AppUser user)
+        {
+            if (!ModelState.IsValid)
+            {
+                ModelState.AddModelError(string.Empty, "Please fill all fields.");
+
+                return BadRequest(ModelState);
+            }
+
+            var original = await _userManager.FindByIdAsync(user.Id);
+
+            if (original == null)
+            {
+                ModelState.AddModelError(string.Empty, "Could not find the original.");
+
+                return NotFound(ModelState);
+            }
+
+            var result = await _userManager.UpdateAsync(user);
+
+            if (result.Succeeded)
+            {
+                return RedirectToAction(nameof(Profile), "Account", new { id = user.Id });
+            }
+            else
+            {
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+
+                return BadRequest(ModelState);
+            }
+        }
+
+        #endregion Edit
+
+        #region Delete
+
+        [HttpGet]
+        public async Task<IActionResult> Delete(string id)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                ModelState.AddModelError(string.Empty, "Something went wrong.");
+
+                return BadRequest(ModelState);
+            }
+
+            var user = await _userManager.FindByIdAsync(id);
+
+            if (user == null)
+            {
+                ModelState.AddModelError(string.Empty, "Could not find the requested user.");
+
+                return NotFound(ModelState);
+            }
+
+            return View(new FrontUser { Id = user.Id, FirstName = user.FirstName, LastName = user.LastName, Age = user.Age, Email = user.Email, IsAdmin = user.IsAdmin, PhoneNumber = user.PhoneNumber });
+        }
+
+        [HttpPost, ActionName("Delete")]
+        public async Task<IActionResult> DeleteConfirmed(string id)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                ModelState.AddModelError(string.Empty, "Something went wrong.");
+
+                return BadRequest(ModelState);
+            }
+
+            var result = await _userManager.DeleteAsync(await _userManager.FindByIdAsync(id));
+
+            if (result.Succeeded)
+            {
+                return RedirectToAction(nameof(Index), "Home");
+            }
+            else
+            {
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+
+                return BadRequest(ModelState);
+            }
+        }
+
+        #endregion Delete
     }
 }

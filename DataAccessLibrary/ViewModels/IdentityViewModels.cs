@@ -13,9 +13,11 @@ namespace Identity3_0.ViewModels
     [ProtectedPersonalData]
     public class AppUser : IdentityUser
     {
+        public override string UserName { get => base.UserName; set => base.UserName = Email; }
+
         [Required]
         [Display(Name = "Firstname")]
-        [StringLength(30, MinimumLength =2, ErrorMessage = "The firstname cannot exceed 30 characters nor be less than 2.")]
+        [StringLength(30, MinimumLength = 2, ErrorMessage = "The firstname cannot exceed 30 characters nor be less than 2.")]
         public string FirstName { get; set; }
 
         [Required]
@@ -82,6 +84,9 @@ namespace Identity3_0.ViewModels
     [ProtectedPersonalData]
     public class FrontUser
     {
+        [Key]
+        public string Id { get; set; }
+
         [Required]
         [Display(Name = "Firstname")]
         [StringLength(30, MinimumLength = 2, ErrorMessage = "The firstname cannot exceed 30 characters nor be less than 2.")]

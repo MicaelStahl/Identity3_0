@@ -1,0 +1,39 @@
+﻿@model RegisterUser
+@{
+    ViewData["Title"] = "Register";
+}
+
+<h1>Register</h1>
+<hr />
+
+<div class="col-3 shadow border">
+    <form asp-action="Register" asp-controller="Account" method="post">
+        <div asp-validation-summary="ModelOnly"></div>
+        @Html.AntiForgeryToken()
+        <div class="form-group">
+            <label asp-for="FirstName"></label>
+            <input asp-for="FirstName" autofocus />
+            <span class="text-danger font-weight-bold" asp-validation-for="FirstName"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="FirstName"></label>
+            <input asp-for="FirstName" autofocus />
+            <span class="text-danger font-weight-bold" asp-validation-for="FirstName"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="FirstName"></label>
+            <input asp-for="FirstName" autofocus />
+            <span class="text-danger font-weight-bold" asp-validation-for="FirstName"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="FirstName"></label>
+            <input asp-for="FirstName" autofocus />
+            <span class="text-danger font-weight-bold" asp-validation-for="FirstName"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="FirstName"></label>
+            <input asp-for="FirstName" autofocus />
+            <span class="text-danger font-weight-bold" asp-validation-for="FirstName"></span>
+        </div>
+    </form>
+</div>
