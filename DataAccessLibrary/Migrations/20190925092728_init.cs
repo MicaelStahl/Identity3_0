@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace Identity3_0.Migrations
+namespace DataAccessLibrary.Migrations
 {
     public partial class init : Migration
     {

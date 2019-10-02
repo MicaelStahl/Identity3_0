@@ -4,7 +4,7 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
 
-namespace Identity3_0.ViewModels
+namespace DataAccessLibrary.ViewModels
 {
     #region Global variables
 
@@ -94,5 +94,5 @@ namespace Identity3_0.ViewModels
         }
     }
 
-    #endregion
+    #endregion Global variables
 }

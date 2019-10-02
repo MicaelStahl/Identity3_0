@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Identity3_0.Models;
+using DataAccessLibrary.Models;
 
 namespace Identity3_0.Controllers
 {

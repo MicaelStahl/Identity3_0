@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
-using Identity3_0.Interfaces;
-using Identity3_0.Models;
-using Identity3_0.ViewModels;
+using BusinessLibrary.Interfaces;
+using DataAccessLibrary.Models;
+using DataAccessLibrary.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Identity3_0.Controllers

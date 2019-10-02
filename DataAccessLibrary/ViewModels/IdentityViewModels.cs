@@ -1,11 +1,12 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Identity3_0.ViewModels
+namespace DataAccessLibrary.ViewModels
 {
     /// <summary>
     /// The default User for the application.
@@ -13,7 +14,8 @@ namespace Identity3_0.ViewModels
     [ProtectedPersonalData]
     public class AppUser : IdentityUser
     {
-        public override string UserName { get => base.UserName; set => base.UserName = Email; }
+        // This automatically sets the username to be the same as the given Email.
+        //public override string UserName { get => base.UserName; set => base.UserName = Email; }
 
         [Required]
         [Display(Name = "Firstname")]
@@ -33,6 +35,7 @@ namespace Identity3_0.ViewModels
         [EmailAddress]
         [Display(Name = "Email")]
         [DataType(DataType.EmailAddress)]
+        [Remote(action: "VerifyEmail", controller: "Validation")]
         public override string Email { get; set; } // Overriding to get the email the way I want it.
 
         [Required]
@@ -44,6 +47,7 @@ namespace Identity3_0.ViewModels
         /// <summary>
         /// Indicates whether the user is an admin or not.
         /// </summary>
+        [Display(Name = "Admin")]
         public bool IsAdmin { get; set; }
     }
 
@@ -59,7 +63,8 @@ namespace Identity3_0.ViewModels
 
         [Required]
         [Compare("Password")]
-        public string ComparePassword { get; set; }
+        [Display(Name = "Password confirmation")]
+        public string PasswordConfirmation { get; set; }
     }
 
     /// <summary>
@@ -74,7 +79,7 @@ namespace Identity3_0.ViewModels
 
         [Required]
         [DataType(DataType.Password)]
-        [StringLength(20, MinimumLength = 8, ErrorMessage = "The password cannot exceed 20 characters nro be less than 8.")]
+        [StringLength(20, MinimumLength = 8, ErrorMessage = "The password cannot exceed 20 characters nor be less than 8.")]
         public string Password { get; set; }
     }
 

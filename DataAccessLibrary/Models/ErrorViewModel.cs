@@ -1,6 +1,6 @@
 using System;
 
-namespace Identity3_0.Models
+namespace DataAccessLibrary.Models
 {
     public class ErrorViewModel
     {

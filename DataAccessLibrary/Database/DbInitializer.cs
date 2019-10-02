@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Identity3_0.Database;
-using Identity3_0.Models;
-using Identity3_0.ViewModels;
+using DataAccessLibrary.Database;
+using DataAccessLibrary.Models;
+using DataAccessLibrary.ViewModels;
 using Microsoft.AspNetCore.Identity;
 
-namespace Identity3_0
+namespace DataAccessLibrary
 {
     public class DbInitializer
     {

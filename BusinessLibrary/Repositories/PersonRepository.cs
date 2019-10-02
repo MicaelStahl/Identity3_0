@@ -1,12 +1,12 @@
-﻿using Identity3_0.Database;
-using Identity3_0.Interfaces;
-using Identity3_0.Models;
-using Identity3_0.ViewModels;
+﻿using BusinessLibrary.Interfaces;
+using DataAccessLibrary.Database;
+using DataAccessLibrary.Models;
+using DataAccessLibrary.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Threading.Tasks;
 
-namespace Identity3_0.Repositories
+namespace BusinessLibrary.Repositories
 {
     public class PersonRepository : IPersonRepository
     {
@@ -122,7 +122,7 @@ namespace Identity3_0.Repositories
 
                 person.City = await _db.Cities.SingleOrDefaultAsync(x => x.Id == cityId);
 
-                var original = await _db.People.Include(x=>x.City).SingleOrDefaultAsync(x => x.Id == person.Id);
+                var original = await _db.People.Include(x => x.City).SingleOrDefaultAsync(x => x.Id == person.Id);
 
                 if (original == null)
                 {

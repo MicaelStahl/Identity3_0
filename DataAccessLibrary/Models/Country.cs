@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Identity3_0.Models
+namespace DataAccessLibrary.Models
 {
     public class Country
     {
@@ -13,7 +13,7 @@ namespace Identity3_0.Models
 
         [Required]
         [StringLength(30, MinimumLength = 2, ErrorMessage = "The name cannot exceed 30 characters nor be less than 2.")]
-        public string Name { get; set;}
+        public string Name { get; set; }
 
         [Required]
         [Range(1, 100_000_000_000, ErrorMessage = "The population cannot exceed 100 Billion nor be less than 1.")]

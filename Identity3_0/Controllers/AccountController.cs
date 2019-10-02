@@ -1,4 +1,4 @@
-﻿using Identity3_0.ViewModels;
+﻿using DataAccessLibrary.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -50,7 +50,7 @@ namespace MVC_Identity.Controllers
                 return View();
             }
 
-            var result = await _signInManager.PasswordSignInAsync(user.Email, user.Password, false, false);
+            var result = await _signInManager.PasswordSignInAsync(await _userManager.FindByNameAsync(user.Email), user.Password, false, false);
 
             if (result.Succeeded)
             {
@@ -83,8 +83,11 @@ namespace MVC_Identity.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        public IActionResult Register()
+        public IActionResult Register(bool created = false)
         {
+            if (created)
+                ViewBag.created = "User was successfully created.";
+
             return View();
         }
 
@@ -103,14 +106,14 @@ namespace MVC_Identity.Controllers
 
                 if (await _userManager.FindByEmailAsync(user.Email) != null)
                 {
-                    ModelState.AddModelError(string.Empty, "The Email is already in use.");
+                    ModelState.AddModelError(user.Email, "The Email is already in use.");
 
                     ViewBag.error = "The Email is already in use.";
 
                     return View();
                 }
 
-                //user.UserName = user.Email; // Should in theory not be needed considering the configuration for AppUser.
+                user.UserName = user.Email; // Should in theory not be needed considering the configuration for AppUser.
 
                 var result = await _userManager.CreateAsync(user, user.Password);
 
@@ -123,7 +126,13 @@ namespace MVC_Identity.Controllers
                         await _userManager.AddToRolesAsync(user, new List<string> { "Administrator", "NormalUser" }) :
                         await _userManager.AddToRoleAsync(user, "NormalUser");
 
-                    return LocalRedirect(nameof(SignIn)); // Redirect to SignIn so user can sign in.
+                    // If user is administrator, then return to same view incase admin wants to create more users.
+                    if (User.IsInRole("Administrator"))
+                    {
+                        return RedirectToAction(nameof(Register), new { created = true }); // Allows the admin to create more users.
+                    }
+
+                    return RedirectToAction(nameof(SignIn)); // Redirect to SignIn so user can sign in.
                 }
                 else
                 {

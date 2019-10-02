@@ -3,10 +3,8 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Threading.Tasks;
-using Identity3_0.Database;
-using Identity3_0.Interfaces;
-using Identity3_0.Repositories;
-using Identity3_0.ViewModels;
+using DataAccessLibrary.Database;
+using DataAccessLibrary.ViewModels;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -18,6 +16,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Text.Json.Serialization;
+using BusinessLibrary.Interfaces;
+using BusinessLibrary.Repositories;
 
 namespace Identity3_0
 {
@@ -40,6 +40,7 @@ namespace Identity3_0
 
             services.AddScoped<IPersonRepository, PersonRepository>();
             services.AddScoped<IGlobalRepository, GlobalRepository>();
+            services.AddScoped<IAccountValidation, AccountValidation>();
 
             services.AddIdentity<AppUser, IdentityRole>()
                 .AddEntityFrameworkStores<Identity3_0DbContext>()
@@ -48,7 +49,6 @@ namespace Identity3_0
             services.AddDistributedMemoryCache();
             services.AddSession(options =>
             {
-
                 options.IdleTimeout = TimeSpan.FromMinutes(20);
             });
 
@@ -114,6 +114,8 @@ namespace Identity3_0
             app.UseRouting();
 
             app.UseSession();
+
+            app.UseAuthentication();
 
             app.UseAuthorization();
 

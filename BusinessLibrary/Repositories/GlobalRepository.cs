@@ -1,14 +1,14 @@
-﻿using Identity3_0.Database;
-using Identity3_0.Interfaces;
-using Identity3_0.Models;
-using Identity3_0.ViewModels;
+﻿using BusinessLibrary.Interfaces;
+using DataAccessLibrary.Database;
+using DataAccessLibrary.Models;
+using DataAccessLibrary.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Identity3_0.Repositories
+namespace BusinessLibrary.Repositories
 {
     public class GlobalRepository : IGlobalRepository
     {
@@ -21,11 +21,11 @@ namespace Identity3_0.Repositories
             _db = db;
         }
 
-        #endregion
+        #endregion D.I
 
         public async Task<List<City>> GetCities()
         {
-            return await _db.Cities.Include(x=>x.Country).ToListAsync();
+            return await _db.Cities.Include(x => x.Country).ToListAsync();
         }
 
         public async Task<List<Country>> GetCountries()
@@ -35,7 +35,7 @@ namespace Identity3_0.Repositories
 
         public async Task<List<Person>> GetPeople()
         {
-            return await _db.People.Include(x=>x.City).ToListAsync();
+            return await _db.People.Include(x => x.City).ToListAsync();
         }
     }
 }

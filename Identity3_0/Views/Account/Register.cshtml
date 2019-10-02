@@ -3,37 +3,71 @@
     ViewData["Title"] = "Register";
 }
 
-<h1>Register</h1>
+<h1>Register user</h1>
 <hr />
+
+@if (ViewBag.created != null)
+{
+    <div class="container col-4 text-success font-weight-bold">@ViewBag.created</div>
+}
+
+@if (ViewBag.error != null)
+{
+
+    <div class="container col-4 text-danger font-weight-bold">@ViewBag.error</div>
+}
 
 <div class="col-3 shadow border">
     <form asp-action="Register" asp-controller="Account" method="post">
+        <h1>Register</h1>
+        <hr />
+
         <div asp-validation-summary="ModelOnly"></div>
         @Html.AntiForgeryToken()
         <div class="form-group">
-            <label asp-for="FirstName"></label>
-            <input asp-for="FirstName" autofocus />
+            <label class="control-label" asp-for="FirstName"></label>
+            <input class="form-control" asp-for="FirstName" autofocus />
             <span class="text-danger font-weight-bold" asp-validation-for="FirstName"></span>
         </div>
         <div class="form-group">
-            <label asp-for="FirstName"></label>
-            <input asp-for="FirstName" autofocus />
-            <span class="text-danger font-weight-bold" asp-validation-for="FirstName"></span>
+            <label class="control-label" asp-for="LastName"></label>
+            <input class="form-control" asp-for="LastName" />
+            <span class="text-danger font-weight-bold" asp-validation-for="LastName"></span>
         </div>
         <div class="form-group">
-            <label asp-for="FirstName"></label>
-            <input asp-for="FirstName" autofocus />
-            <span class="text-danger font-weight-bold" asp-validation-for="FirstName"></span>
+            <label class="control-label" asp-for="Email"></label>
+            <input id="EmailRegistration" class="form-control" asp-for="Email" />
+            <span id="EmailRegistrationVali" class="text-danger font-weight-bold" asp-validation-for="Email"></span>
         </div>
         <div class="form-group">
-            <label asp-for="FirstName"></label>
-            <input asp-for="FirstName" autofocus />
-            <span class="text-danger font-weight-bold" asp-validation-for="FirstName"></span>
+            <label class="control-label" asp-for="Age"></label>
+            <input class="form-control" asp-for="Age" />
+            <span class="text-danger font-weight-bold" asp-validation-for="Age"></span>
         </div>
         <div class="form-group">
-            <label asp-for="FirstName"></label>
-            <input asp-for="FirstName" autofocus />
-            <span class="text-danger font-weight-bold" asp-validation-for="FirstName"></span>
+            <label class="control-label" asp-for="PhoneNumber"></label>
+            <input class="form-control" asp-for="PhoneNumber" />
+            <span class="text-danger font-weight-bold" asp-validation-for="PhoneNumber"></span>
+        </div>
+        @if (User.IsInRole("Administrator"))
+        {
+            <div class="form-group">
+                <label class="control-label" asp-for="IsAdmin"></label>
+                <input class="form-inline" asp-for="IsAdmin" />
+            </div>
+        }
+        <div class="form-group">
+            <label class="control-label" asp-for="Password"></label>
+            <input class="form-control" asp-for="Password" />
+            <span class="text-danger font-weight-bold" asp-validation-for="Password"></span>
+        </div>
+        <div class="form-group">
+            <label class="control-label" asp-for="PasswordConfirmation"></label>
+            <input class="form-control" asp-for="PasswordConfirmation" type="password" />
+            <span class="text-danger font-weight-bold" asp-validation-for="PasswordConfirmation"></span>
+        </div>
+        <div class="form-group">
+            <input type="submit" value="Submit" class="btn btn-primary btn-sm" />
         </div>
     </form>
 </div>
