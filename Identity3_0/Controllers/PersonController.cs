@@ -221,9 +221,9 @@ namespace Identity3_0.Controllers
             }
         }
 
-        [HttpPost, ActionName("Delete")]
+        [HttpDelete, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(Guid id)
+        public async Task<IActionResult> DeleteConfirmed([FromBody]Guid id)
         {
             try
             {

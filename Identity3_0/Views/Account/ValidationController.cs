@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace MVC_Identity.Views.Account
 {
+    /// <summary>
+    /// Only called via Ajax calls for various validation things, for example unique emails.
+    /// </summary>
     public class ValidationController : Controller
     {
         #region D.I
@@ -30,7 +33,7 @@ namespace MVC_Identity.Views.Account
         {
             if (!_validate.VerifyEmail(email))
             {
-                return Json($"Email {email} is already in use.");
+                return Json($"Email is already in use.");
             }
 
             return Json(true);

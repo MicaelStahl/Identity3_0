@@ -3,7 +3,7 @@
     ViewData["Title"] = "Delete";
 }
 
-<h1>Details of @Model.FirstName</h1>
+<h1>Delete @Model.FirstName?</h1>
 <hr />
 <partial name="_GoBackButton" />
 
@@ -41,7 +41,7 @@
     <div class="btn-group mb-2">
         <form asp-action="Delete" asp-controller="Person" asp-route-id="@Model.Id">
             @Html.AntiForgeryToken()
-        <input type="submit" class="btn btn-danger" value="Delete" />
+            <input type="submit" class="btn btn-danger" value="Delete" />
         </form>
         &nbsp; | &nbsp;
         <a asp-action="Index" asp-controller="Person">Cancel</a>

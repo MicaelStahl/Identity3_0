@@ -3,8 +3,8 @@
 
 // Write your JavaScript code.
 
-$("#EmailRegistration").on(addEventListener("focusout"), function () {
-    var data = $("#EmailRegistration").val();
+$("#EmailRegistration").on("focusout", function () {
+    var data = $("#EmailRegistration").val()
 
     $.ajax({
         url: "/Validation/VerifyEmail",
@@ -12,11 +12,17 @@ $("#EmailRegistration").on(addEventListener("focusout"), function () {
         data: { email: data },
         headers: {
             RequestVerificationToken:
-                $('input:hidden[name="__RequestVerificationToken"]').val
+                $('input:hidden[name="__RequestVerificationToken"]').val()
         }
     }).done(function (result) {
         if (result !== true) {
-            $("#EmailRegistrationVali").val = result;
+            $("#EmailRegistrationVali").html(result)
+            $("#registerSubmitBtn").prop("disabled", true)
+        } else {
+            $("#EmailRegistrationVali").html("")
+            $("#registerSubmitBtn").prop("disabled", false)
         }
+    }).catch(function (error) {
+        throw new Error(error);
     })
 });

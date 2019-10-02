@@ -20,15 +20,20 @@ namespace BusinessLibrary.Repositories
 
         #endregion D.I
 
+        /// <summary>
+        /// Used for verifying User emails before submitting.
+        /// </summary>
+        /// <param name="email"></param>
+        /// <returns></returns>
         public bool VerifyEmail(string email)
         {
-            if (_userManager.FindByEmailAsync(email).Result == null) // Indicates the requested email does not exist in database.
+            if (_userManager.FindByEmailAsync(email).Result == null) // checks if the requested email does not exist in database.
             {
-                return true;
+                return true;    // Indicates the requested email does not exist in database.
             }
             else
             {
-                return false;
+                return false;   // Indicates the requested email does exist in database.
             }
         }
     }
