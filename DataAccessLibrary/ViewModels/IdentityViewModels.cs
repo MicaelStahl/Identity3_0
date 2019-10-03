@@ -35,7 +35,7 @@ namespace DataAccessLibrary.ViewModels
         [EmailAddress]
         [Display(Name = "Email")]
         [DataType(DataType.EmailAddress)]
-        [Remote(action: "VerifyEmail", controller: "Validation")]
+        [Remote(action: "VerifyEmail", controller: "Validation")] // Enables quick authentication via ajax
         public override string Email { get; set; } // Overriding to get the email the way I want it.
 
         [Required]
@@ -121,6 +121,48 @@ namespace DataAccessLibrary.ViewModels
         /// <summary>
         /// Indicates whether the user is an admin or not.
         /// </summary>
+        [Display(Name = "Admin")]
         public bool IsAdmin { get; set; }
+
+        [Display(Name = "User roles")]
+        public List<string> Roles { get; set; } = new List<string>();
+    }
+
+    public class ChangeUserEmail
+    {
+        [Required]
+        [EmailAddress]
+        [Display(Name = "Old Email")]
+        [DataType(DataType.EmailAddress)]
+        public string OldEmail { get; set; }
+
+        [Required]
+        [EmailAddress]
+        [Display(Name = "New Email")]
+        [DataType(DataType.EmailAddress)]
+        public string NewEmail { get; set; }
+    }
+
+    public class ChangeUserPassword
+    {
+        [Key]
+        public string Id { get; set; }
+
+        [Required]
+        [DataType(DataType.Password)]
+        [Display(Name = "Old password")]
+        [StringLength(20, MinimumLength = 8, ErrorMessage = "The password cannot exceed 20 characters nor be less than 8.")]
+        public string OldPassword { get; set; }
+
+        [Required]
+        [DataType(DataType.Password)]
+        [Display(Name = "New password")]
+        [StringLength(20, MinimumLength = 8, ErrorMessage = "The password cannot exceed 20 characters nor be less than 8.")]
+        public string NewPassword { get; set; }
+
+        [Required]
+        [Compare("NewPassword")]
+        [Display(Name = "Password confirmation")]
+        public string PasswordConfirmation { get; set; }
     }
 }

@@ -1,12 +1,14 @@
-﻿@inject SignInManager<AppUser> _signInManager
+﻿@model string
+
+@inject SignInManager<AppUser> _signInManager
 @*@inject UserManager<AppUser> _userManager*@
 
 @*@if (User.Identity.IsAuthenticated)*@
 
-@if (_signInManager.IsSignedIn(User))@* Use this later, used with Claims. *@
+@if (_signInManager.IsSignedIn(User))
 {
     <li class="nav-item">
-        <a asp-action="Profile" asp-controller="Account" class="nav-link btn text-dark">Hello @User.Identity.Name!</a>
+        <a asp-action="Profile" asp-controller="Account" asp-route-email="@User.Identity.Name" class="nav-link btn text-dark"><small>Hello @User.Identity.Name!</small></a>
     </li>
     @if (User.IsInRole("Administrator"))
     {

@@ -1,0 +1,80 @@
+﻿@model FrontUser
+
+@{
+    ViewData["Title"] = "Profile";
+
+    var admin = Model.IsAdmin ? "Yes" : "No";
+}
+
+<h1>Profile</h1>
+<hr />
+<partial name="_GoBackButton" />
+
+<div>
+    <div class="col-4 shadow border float-left mt-3">
+
+        <div class="form-group">
+            <label class="control-label font-weight-bold">Fullname</label>
+            <div class="form-inline">@Model.FirstName @Model.LastName</div>
+        </div>
+
+        <div class="form-group">
+            <label class="control-label font-weight-bold" asp-for="FirstName"></label>
+            <div class="form-inline">@Model.FirstName</div>
+        </div>
+
+        <div class="form-group">
+            <label class="control-label font-weight-bold" asp-for="LastName"></label>
+            <div class="form-inline">@Model.LastName</div>
+        </div>
+
+        <div class="form-group">
+            <label class="control-label font-weight-bold" asp-for="Age"></label>
+            <div class="form-inline">@Model.Age</div>
+        </div>
+
+        <div class="form-group">
+            <label class="control-label font-weight-bold" asp-for="Email"></label>
+            <div class="form-inline">@Model.Email</div>
+        </div>
+
+        <div class="form-group">
+            <label class="control-label font-weight-bold" asp-for="PhoneNumber"></label>
+            <div class="form-inline">@Model.PhoneNumber</div>
+        </div>
+        @if (User.IsInRole("Administrator"))
+        {
+            <div class="form-group">
+                <label class="control-label font-weight-bold" asp-for="IsAdmin"></label>
+                <div class="form-inline">@admin</div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label font-weight-bold" asp-for="Roles"></label>
+                <ul class="list-unstyled">
+                    @foreach (var role in Model.Roles)
+                    {
+                        <li>@role</li>
+                    }
+                </ul>
+            </div>
+        }
+    </div>
+
+    <div class="ml-2 col-2 shadow border float-left mt-3">
+        <ul class="list-unstyled">
+            <li>
+                <a asp-action="Edit" asp-controller="Account" asp-route-id="@Model.Id">Edit</a>
+            </li>
+            <li>
+                <a asp-action="EditUserEmail" asp-controller="Account" asp-route-id="@Model.Id">Edit email</a>
+            </li>
+            <li>
+                <a asp-action="EditUserPassword" asp-controller="Account" asp-route-id="@Model.Id">Change password (reset later)</a>
+            </li>
+            <li>
+                <a asp-action="Delete" asp-controller="Account" asp-route-id="@Model.Id">Delete user</a>
+            </li>
+        </ul>
+    </div>
+</div>

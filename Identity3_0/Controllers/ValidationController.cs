@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using BusinessLibrary.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
-namespace MVC_Identity.Views.Account
+namespace Identity3_0.Controllers
 {
     /// <summary>
     /// Only called via Ajax calls for various validation things, for example unique emails.

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace MVC_Identity.Controllers
@@ -49,8 +50,9 @@ namespace MVC_Identity.Controllers
             {
                 return View();
             }
+            var appUser = await _userManager.FindByNameAsync(user.Email);
 
-            var result = await _signInManager.PasswordSignInAsync(await _userManager.FindByNameAsync(user.Email), user.Password, false, false);
+            var result = await _signInManager.PasswordSignInAsync(appUser, user.Password, false, false);
 
             if (result.Succeeded)
             {
@@ -69,7 +71,6 @@ namespace MVC_Identity.Controllers
         }
 
         [HttpGet]
-        [AllowAnonymous]
         public async Task<IActionResult> SignOut()
         {
             await _signInManager.SignOutAsync();
@@ -155,16 +156,16 @@ namespace MVC_Identity.Controllers
         #region Find
 
         [HttpGet]
-        public async Task<IActionResult> Profile(string id)
+        public async Task<IActionResult> Profile(string email)
         {
-            if (string.IsNullOrWhiteSpace(id))
+            if (string.IsNullOrWhiteSpace(email))
             {
                 ModelState.AddModelError(string.Empty, "Something went wrong.");
 
                 return BadRequest(ModelState);
             }
 
-            var user = await _userManager.FindByIdAsync(id);
+            var user = await _userManager.FindByEmailAsync(email);
 
             if (user == null)
             {
@@ -173,10 +174,19 @@ namespace MVC_Identity.Controllers
                 return NotFound(ModelState);
             }
 
+            if (User.IsInRole("Administrator"))
+            {
+                var roles = await _userManager.GetRolesAsync(user);
+
+                return View(new FrontUser { Id = user.Id, FirstName = user.FirstName, LastName = user.LastName, Age = user.Age, Email = user.Email, IsAdmin = user.IsAdmin, PhoneNumber = user.PhoneNumber, Roles = roles.ToList() });
+            }
+
             return View(new FrontUser { Id = user.Id, FirstName = user.FirstName, LastName = user.LastName, Age = user.Age, Email = user.Email, IsAdmin = user.IsAdmin, PhoneNumber = user.PhoneNumber });
         }
 
         #endregion Find
+
+        #region Edit-Section
 
         #region Edit
 
@@ -244,6 +254,94 @@ namespace MVC_Identity.Controllers
         }
 
         #endregion Edit
+
+        #region EditUserEmail
+
+        [HttpGet]
+        public IActionResult EditUserEmail()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> EditUserEmail(ChangeUserEmail userEmail)
+        {
+            if (!ModelState.IsValid)
+            {
+                ModelState.AddModelError(string.Empty, "Please fill all fields.");
+
+                return View();
+            }
+
+            if (await _userManager.FindByEmailAsync(userEmail.OldEmail) == null)
+            {
+                ModelState.AddModelError(userEmail.OldEmail, "The old email is not in use.");
+
+                return View();
+            }
+
+            if (userEmail.OldEmail == userEmail.NewEmail)
+            {
+                ModelState.AddModelError(string.Empty, "The new password can not be the same as the old one.");
+
+                return View();
+            }
+
+            /* var result = */
+            await _userManager.GenerateChangeEmailTokenAsync(await _userManager.FindByEmailAsync(userEmail.OldEmail), userEmail.NewEmail);
+
+            // Send email verification to the new email.
+
+            return View();
+        }
+
+        #endregion EditUserEmail
+
+        #region EditUserPassword
+
+        [HttpGet]
+        public IActionResult EditUserPassword()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> EditUserPassword(ChangeUserPassword userPassword)
+        {
+            if (!ModelState.IsValid)
+            {
+                ModelState.AddModelError(string.Empty, "Please fill all fields.");
+
+                return View(userPassword);
+            }
+
+            if (userPassword.OldPassword == userPassword.NewPassword)
+            {
+                ModelState.AddModelError(string.Empty, "Cannot use the same password as a previous one.");
+
+                return View(userPassword);
+            }
+
+            var result = await _userManager.ChangePasswordAsync(await _userManager.FindByIdAsync(userPassword.Id), userPassword.OldPassword, userPassword.NewPassword);
+
+            if (result.Succeeded)
+            {
+                return RedirectToAction(nameof(Profile), "Account", new { email = User.Identity.Name });
+            }
+            else
+            {
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+
+                return View(userPassword);
+            }
+        }
+
+        #endregion EditUserPassword
+
+        #endregion Edit-Section
 
         #region Delete
 
