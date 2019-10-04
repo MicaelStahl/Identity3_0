@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -44,6 +45,7 @@ namespace MVC_Identity.Controllers
 
         [HttpPost]
         [AllowAnonymous]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> SignIn(SignInUser user)
         {
             if (!ModelState.IsValid)
@@ -94,6 +96,7 @@ namespace MVC_Identity.Controllers
 
         [HttpPost]
         [AllowAnonymous]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterUser user)
         {
             try
@@ -218,7 +221,8 @@ namespace MVC_Identity.Controllers
         /// <param name="user"></param>
         /// <returns></returns>
         [HttpPost]
-        public async Task<IActionResult> Edit(AppUser user)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(FrontUser user)
         {
             if (!ModelState.IsValid)
             {
@@ -236,7 +240,24 @@ namespace MVC_Identity.Controllers
                 return NotFound(ModelState);
             }
 
-            var result = await _userManager.UpdateAsync(user);
+            original.FirstName = user.FirstName;
+            original.LastName = user.LastName;
+            original.Age = user.Age;
+            original.Email = user.Email;
+            original.PhoneNumber = user.Email;
+
+            // Using Discard " _ " to make this expression a possibility.
+            _ = user.IsAdmin == original.IsAdmin ? // If IsAdmin was not changed
+                null : // Do nothing
+                user.IsAdmin == false && original.IsAdmin == true ? // Else if IsAdmin was changed to false
+                await _userManager.RemoveFromRoleAsync(original, "Administrator") : // Remove from administrator role
+                user.IsAdmin == true && original.IsAdmin == false ? // Else if IsAdmin was changed to true
+                await _userManager.AddToRoleAsync(original, "Administrator") : // Add to administrator role
+                null; // Else do nothing.
+
+            original.IsAdmin = user.IsAdmin;
+
+            var result = await _userManager.UpdateAsync(original);
 
             if (result.Succeeded)
             {
@@ -264,6 +285,7 @@ namespace MVC_Identity.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditUserEmail(ChangeUserEmail userEmail)
         {
             if (!ModelState.IsValid)
@@ -282,14 +304,16 @@ namespace MVC_Identity.Controllers
 
             if (userEmail.OldEmail == userEmail.NewEmail)
             {
-                ModelState.AddModelError(string.Empty, "The new password can not be the same as the old one.");
+                ModelState.AddModelError(string.Empty, "The new email can not be the same as the old one.");
 
                 return View();
             }
 
-            /* var result = */
-            await _userManager.GenerateChangeEmailTokenAsync(await _userManager.FindByEmailAsync(userEmail.OldEmail), userEmail.NewEmail);
+            var result = await _userManager.GenerateChangeEmailTokenAsync(await _userManager.FindByEmailAsync(userEmail.OldEmail), userEmail.NewEmail);
 
+            if (string.IsNullOrWhiteSpace(result))
+            {
+            }
             // Send email verification to the new email.
 
             return View();
@@ -300,12 +324,31 @@ namespace MVC_Identity.Controllers
         #region EditUserPassword
 
         [HttpGet]
-        public IActionResult EditUserPassword()
+        public async Task<IActionResult> EditUserPassword(string id)
         {
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                ModelState.AddModelError(string.Empty, "Something went wrong.");
+
+                return BadRequest();
+            }
+
+            var user = await _userManager.FindByIdAsync(id);
+
+            if (user == null)
+            {
+                ModelState.AddModelError(string.Empty, "Could not find the requested user.");
+
+                return NotFound(ModelState);
+            }
+
+            ViewBag.Id = user.Id;
+
             return View();
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditUserPassword(ChangeUserPassword userPassword)
         {
             if (!ModelState.IsValid)
@@ -364,10 +407,13 @@ namespace MVC_Identity.Controllers
                 return NotFound(ModelState);
             }
 
-            return View(new FrontUser { Id = user.Id, FirstName = user.FirstName, LastName = user.LastName, Age = user.Age, Email = user.Email, IsAdmin = user.IsAdmin, PhoneNumber = user.PhoneNumber });
+            var roles = await _userManager.GetRolesAsync(user);
+
+            return View(new FrontUser { Id = user.Id, FirstName = user.FirstName, LastName = user.LastName, Age = user.Age, Email = user.Email, IsAdmin = user.IsAdmin, PhoneNumber = user.PhoneNumber, Roles = roles.ToList() });
         }
 
         [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
             if (string.IsNullOrWhiteSpace(id))

@@ -1,0 +1,61 @@
+﻿@model FrontUser
+@{
+    ViewData["Title"] = "Delete";
+}
+
+@{var admin = Model.IsAdmin ? "Yes" : "No"; }
+
+<h1>Delete @Model.FirstName</h1>
+<hr />
+<partial name="_GoBackButton" />
+
+<div class="float-right">
+    <p>Are you sure you want to delete @Model.FirstName? This action cannot be reverted.</p>
+    <form asp-action="Delete" asp-controller="Account">
+        @Html.AntiForgeryToken()
+        <input type="submit" value="Delete" class="btn btn-danger ml-1" />
+    </form>
+</div>
+
+<div class="col-3 shadow border">
+    <div class="form-group">
+        <label class="control-label">Full name</label>
+        <div class="form-inline">@Model.FirstName @Model.LastName</div>
+    </div>
+    <div class="form-group">
+        <label class="control-label" asp-for="FirstName"></label>
+        <div class="form-inline">@Model.FirstName</div>
+    </div>
+    <div class="form-group">
+        <label class="control-label" asp-for="LastName"></label>
+        <div class="form-inline">@Model.LastName</div>
+    </div>
+    <div class="form-group">
+        <label class="control-label" asp-for="Age"></label>
+        <div class="form-inline">@Model.Age</div>
+    </div>
+    <div class="form-group">
+        <label class="control-label" asp-for="Email"></label>
+        <div class="form-inline">@Model.Email</div>
+    </div>
+    <div class="form-group">
+        <label class="control-label" asp-for="PhoneNumber"></label>
+        <div class="form-inline">@Model.PhoneNumber</div>
+    </div>
+    @if (User.IsInRole("Administrator") && User.Identity.IsAuthenticated)
+    {
+        <div class="form-group">
+            <label class="control-label" asp-for="IsAdmin"></label>
+            <div class="form-inline">@admin</div>
+        </div>
+        <div class="form-group">
+            <label class="control-label" asp-for="Roles"></label>
+            <ul class="list-unstyled">
+                @foreach (var role in Model.Roles)
+                {
+                    <li>@role</li>
+                }
+            </ul>
+        </div>
+    }
+</div>

@@ -10,6 +10,8 @@
 <hr />
 <partial name="_GoBackButton" />
 
+<p class="container">Expand on this page later on.</p>
+
 <div>
     <div class="col-4 shadow border float-left mt-3">
 
@@ -63,6 +65,12 @@
 
     <div class="ml-2 col-2 shadow border float-left mt-3">
         <ul class="list-unstyled">
+            @if (User.IsInRole("Administrator") && User.Identity.Name != Model.Email)
+            { // This is only used for admins when they are not viewing their own profile.
+                <li>
+                    <a asp-action="EditUserRoles" asp-controller="Account" asp-route-id="@Model.Id">Update roles</a>
+                </li>
+            }
             <li>
                 <a asp-action="Edit" asp-controller="Account" asp-route-id="@Model.Id">Edit</a>
             </li>
