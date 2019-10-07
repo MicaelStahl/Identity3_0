@@ -39,6 +39,7 @@ namespace Identity3_0
             });
 
             services.AddScoped<IPersonRepository, PersonRepository>();
+            services.AddScoped<ICityRepository, CityRepository>();
             services.AddScoped<IGlobalRepository, GlobalRepository>();
             services.AddScoped<IAccountValidation, AccountValidation>();
 

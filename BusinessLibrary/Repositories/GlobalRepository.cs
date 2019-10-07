@@ -26,19 +26,27 @@ namespace BusinessLibrary.Repositories
 
         #endregion D.I
 
-        public async Task<List<City>> GetCities()
+        public async Task<Dictionary<Guid, string>> GetCities()
         {
-            return await _db.Cities.Include(x => x.Country).ToListAsync();
+            var cities = new Dictionary<Guid, string>();
+
+            await _db.Cities.ForEachAsync(x => cities.Add(x.Id, x.Name));
+
+            return cities;
         }
 
-        public async Task<List<Country>> GetCountries()
+        public async Task<Dictionary<Guid, string>> GetCountries()
         {
-            return await _db.Countries.ToListAsync();
+            var countries = new Dictionary<Guid, string>();
+
+            await _db.Countries.ForEachAsync(x => countries.Add(x.Id, x.Name));
+
+            return countries;
         }
 
         public async Task<List<Person>> GetPeople()
         {
-            return await _db.People.Include(x => x.City).ToListAsync();
+            return await _db.People.ToListAsync();
         }
     }
 }

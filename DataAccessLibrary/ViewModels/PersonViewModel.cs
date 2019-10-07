@@ -23,11 +23,15 @@ namespace DataAccessLibrary.ViewModels
     /// <summary>
     /// Used for creation and contains a list of cities.
     /// </summary>
-    public class PersonUpdate : CityListWithMessage
+    public class PersonUpdate
     {
         public Person Person { get; set; }
 
         public Guid CityId { get; set; }
+
+        public ActionMessages Message { get; set; }
+
+        public Dictionary<Guid, string> Cities { get; set; } = new Dictionary<Guid, string>();
     }
 
     public class PersonCreate

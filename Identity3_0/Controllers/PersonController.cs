@@ -34,12 +34,12 @@ namespace Identity3_0.Controllers
             //return Enum.GetName(typeof(ActionMessages), message);
         }
 
-        public async Task<IActionResult> Index(string message = null) // if nothing else is stated it gets the value of Success.
+        public async Task<IActionResult> Index(string message = null)
         {
             if (!string.IsNullOrWhiteSpace(message))
                 ViewBag.message = $"The requested person was successfully {message.ToLower()}!";
 
-            return View(await _list.GetPeople());
+            return View(await _service.FindAll());
         }
 
         [HttpGet]

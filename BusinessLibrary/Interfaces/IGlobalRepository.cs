@@ -10,8 +10,8 @@ namespace BusinessLibrary.Interfaces
     {
         Task<List<Person>> GetPeople();
 
-        Task<List<City>> GetCities();
+        Task<Dictionary<Guid, string>> GetCities();
 
-        Task<List<Country>> GetCountries();
+        Task<Dictionary<Guid, string>> GetCountries();
     }
 }

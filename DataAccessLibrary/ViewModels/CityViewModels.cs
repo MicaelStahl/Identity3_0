@@ -23,7 +23,12 @@ namespace DataAccessLibrary.ViewModels
     /// <summary>
     /// Used for creation and contains a list of countries.
     /// </summary>
-    public class CityCreation : CountryListWithMessage
+    public class CityCreation
     {
+        public City City { get; set; }
+
+        public ActionMessages Message { get; set; }
+
+        public Dictionary<Guid, string> Countries { get; set; } = new Dictionary<Guid, string>();
     }
 }
