@@ -88,7 +88,7 @@ namespace Identity3_0.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Details(Guid id)
+        public async Task<IActionResult> Details(Guid id, bool updated = false)
         {
             try
             {
@@ -101,6 +101,10 @@ namespace Identity3_0.Controllers
 
                 if (result.Message == ActionMessages.Success)
                 {
+                    if (updated)
+                    {
+                        ViewBag.message = $"{result.Person.FirstName} was successfully updated";
+                    }
                     return View(result.Person);
                 }
                 else if (result.Message == ActionMessages.NotFound)
@@ -166,19 +170,19 @@ namespace Identity3_0.Controllers
 
                 var result = await _service.Edit(person, CityId);
 
-                if (result == ActionMessages.Updated)
+                if (result.Message == ActionMessages.Updated)
                 {
-                    return RedirectToAction(nameof(Index), "Person", new { message = ConvertEnumToString(result) });
+                    return RedirectToAction(nameof(Details), "Person", new { id = result.Person.Id, updated = true });
                 }
-                else if (result == ActionMessages.NotFound)
+                else if (result.Message == ActionMessages.NotFound)
                 {
-                    ModelState.AddModelError(string.Empty, ConvertEnumToString(result));
+                    ModelState.AddModelError(string.Empty, ConvertEnumToString(result.Message));
 
                     return NotFound(ModelState);
                 }
                 else
                 {
-                    throw new Exception(ConvertEnumToString(result));
+                    throw new Exception(ConvertEnumToString(result.Message));
                 }
             }
             catch (Exception ex)

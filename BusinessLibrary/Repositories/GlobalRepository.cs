@@ -10,6 +10,9 @@ using System.Threading.Tasks;
 
 namespace BusinessLibrary.Repositories
 {
+    /// <summary>
+    /// Returns a list of respective objects (Cities, Countries, People)
+    /// </summary>
     public class GlobalRepository : IGlobalRepository
     {
         #region D.I

@@ -105,19 +105,19 @@ namespace BusinessLibrary.Repositories
 
         #region Edit
 
-        public async Task<ActionMessages> Edit(Person person, Guid? cityId)
+        public async Task<PersonWithMessage> Edit(Person person, Guid? cityId)
         {
             try
             {
                 if (string.IsNullOrWhiteSpace(person.FirstName) || string.IsNullOrWhiteSpace(person.LastName) ||
                     string.IsNullOrWhiteSpace(person.Email) || string.IsNullOrWhiteSpace(person.PhoneNumber))
                 {
-                    return ActionMessages.FillAllFields;
+                    return new PersonWithMessage { Message = ActionMessages.FillAllFields };
                 }
 
                 if (person.Age > 110 || person.Age < 1)
                 {
-                    return ActionMessages.InvalidAge;
+                    return new PersonWithMessage { Message = ActionMessages.InvalidAge };
                 }
 
                 person.City = await _db.Cities.SingleOrDefaultAsync(x => x.Id == cityId);
@@ -126,7 +126,7 @@ namespace BusinessLibrary.Repositories
 
                 if (original == null)
                 {
-                    return ActionMessages.NotFound;
+                    return new PersonWithMessage { Message = ActionMessages.NotFound };
                 }
 
                 original.FirstName = person.FirstName;
@@ -138,11 +138,11 @@ namespace BusinessLibrary.Repositories
 
                 await _db.SaveChangesAsync();
 
-                return ActionMessages.Updated;
+                return new PersonWithMessage { Message = ActionMessages.Updated, Person = original };
             }
             catch
             {
-                return ActionMessages.Failed;
+                return new PersonWithMessage { Message = ActionMessages.Failed };
             }
         }
 

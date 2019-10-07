@@ -15,7 +15,7 @@ namespace BusinessLibrary.Interfaces
 
         Task<PersonListWithMessage> FindAll();
 
-        Task<ActionMessages> Edit(Person person, Guid? cityId);
+        Task<PersonWithMessage> Edit(Person person, Guid? cityId);
 
         Task<ActionMessages> Delete(Guid id);
     }

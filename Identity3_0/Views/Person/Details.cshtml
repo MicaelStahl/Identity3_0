@@ -8,6 +8,12 @@
 <partial name="_GoBackButton" />
 
 <div class="shadow border mt-3 col-3">
+
+    @if (ViewBag.message != null)
+    {
+        <div class="text-success font-weight-bold updatedPerson">@ViewBag.message</div>
+    }
+
     <div class="form-group">
         <label class="font-weight-bold"><ins>Full name</ins></label>
         <div>@Model.FirstName @Model.LastName</div>
@@ -42,3 +48,10 @@
         <partial name="_ED_Buttons" model="@Model.Id" />
     </div>
 </div>
+
+@if (ViewBag.message != null)
+{ // No reason to load this script unless the value it's supposed to change is active.
+    <script>
+        setTimeout(() => $(".updatedPerson").fadeOut(), 3000)
+    </script>
+}
