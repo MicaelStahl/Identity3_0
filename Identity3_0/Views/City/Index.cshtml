@@ -5,9 +5,11 @@
 
 <h1>List of cities</h1>
 <hr />
-<partial name="_GoBackButton" />
+
+<a class="btn btn-primary btn-sm " asp-action="Create" asp-controller="City">Create new city</a>
 
 <div class="col-8 shadow border mt-3">
+
     @if (ViewBag.message != null)
     {
         <div class="container text-success font-weight-bold updatedText">@ViewBag.message</div>

@@ -39,9 +39,9 @@ namespace DataAccessLibrary.ViewModels
     /// </summary>
     public class AddPeopleToCity
     {
-        public Guid CityId { get; set; }
+        public KeyValuePair<Guid, string> City { get; set; }
 
-        public List<Person> Homeless { get; set; } = new List<Person>();
+        public List<Person> People { get; set; } = new List<Person>();
     }
 
     /// <summary>

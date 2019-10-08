@@ -1,0 +1,62 @@
+﻿@model AddPeopleToCity
+@{
+    ViewData["Title"] = "AddPeople";
+}
+
+<h1>Add people to @Model.City.Value</h1>
+<hr />
+<partial name="_GoBackButton" />
+
+<div class="col-8 border shadow mt-3">
+    <h1>Choose what people to add to @Model.City.Value.</h1>
+    <hr />
+    @if (Model.People == null || Model.People.Count == 0)
+    {
+        <div>There are no people available to add to City.</div>
+    }
+
+    <form asp-action="AddPeople" asp-controller="City">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="CityId" value="@Model.City.Key" />
+        <div class="form-group">
+            <div class="list-group">
+                <table class="table table-active table-hover table-striped rounded">
+                    <thead>
+                        <tr class="d-table-row">
+                            <th class="d-table-cell">Name</th>
+                            <th class="d-table-cell">Age</th>
+                            <th class="d-table-cell">Email</th>
+                            <th class="d-table-cell">Phonenumber</th>
+                            <th class="d-table-cell">Current City</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var person in Model.People)
+                        {
+                            <tr class="d-table-row">
+                                <td class="d-table-cell">
+                                    <input name="PeopleId" type="checkbox" value="@person.Id" />
+                                    @person.FirstName @person.LastName
+                                </td>
+                                <td class="d-table-cell">@person.Age</td>
+                                <td class="d-table-cell">@person.Email</td>
+                                <td class="d-table-cell">@person.PhoneNumber</td>
+                                @if (person.City == null)
+                                {
+                                    <td class="d-table-cell">Homeless</td>
+                                }
+                                else
+                                {
+                                    <td class="d-table-cell">@person.City.Name</td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="form-group">
+            <input type="submit" value="Submit" class="btn btn-primary btn-sm" />
+        </div>
+    </form>
+</div>

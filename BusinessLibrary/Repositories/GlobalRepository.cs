@@ -50,12 +50,12 @@ namespace BusinessLibrary.Repositories
         }
 
         /// <summary>
-        /// Returns a list of people not belonging to a City.
+        /// Returns a list of people not belonging to the requested City.
         /// </summary>
         /// <returns></returns>
-        public async Task<List<Person>> HomelessPeople()
-        {   // Includes the City-value for all people in database, then filters out all people that has a City.
-            return await _db.People.Include(x => x.City).Where(x => x.City == null).ToListAsync();
+        public async Task<List<Person>> PeopleNotInCity(City city)
+        {
+            return await _db.People.Include(x => x.City).Where(x => x.City != city).ToListAsync();
         }
     }
 }

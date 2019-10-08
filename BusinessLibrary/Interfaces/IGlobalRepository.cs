@@ -14,6 +14,6 @@ namespace BusinessLibrary.Interfaces
 
         Task<Dictionary<Guid, string>> GetCountries();
 
-        Task<List<Person>> HomelessPeople();
+        Task<List<Person>> PeopleNotInCity(City city);
     }
 }

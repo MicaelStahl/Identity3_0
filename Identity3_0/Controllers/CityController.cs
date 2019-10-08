@@ -44,7 +44,7 @@ namespace MVC_Identity.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([FromBody]City city, Guid? countryId)
+        public async Task<IActionResult> Create([FromForm]City city, Guid? countryId)
         {
             if (!ModelState.IsValid)
             {
@@ -139,7 +139,7 @@ namespace MVC_Identity.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit([FromBody]City city, Guid? countryId)
+        public async Task<IActionResult> Edit([FromForm]City city, Guid? countryId)
         {
             if (!ModelState.IsValid)
             {
@@ -182,7 +182,7 @@ namespace MVC_Identity.Controllers
 
             if (result.Message == ActionMessages.Success)
             {
-                return View(new AddPeopleToCity { CityId = result.City.Id, Homeless = await _list.HomelessPeople() });
+                return View(new AddPeopleToCity { City = new KeyValuePair<Guid, string>(result.City.Id, result.City.Name), People = await _list.PeopleNotInCity(result.City) });
             }
             else if (result.Message == ActionMessages.NotFound)
             {
@@ -198,15 +198,13 @@ namespace MVC_Identity.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddPeople(AddPeopleToCityVM city)
+        public async Task<IActionResult> AddPeople([FromForm]AddPeopleToCityVM city)
         {
             if (city.CityId == Guid.Empty)
             {
                 ModelState.AddModelError(string.Empty, "The Id could not be fetched.");
 
-                ViewBag.message = "Something went wrong. Please try again.";
-
-                return View();
+                return BadRequest(ModelState);
             }
 
             var result = await _service.AddPeople(city.CityId, city.PeopleId);
@@ -240,9 +238,7 @@ namespace MVC_Identity.Controllers
             {
                 ModelState.AddModelError(string.Empty, "The Id could not be fetched.");
 
-                ViewBag.message = "Something went wrong. Please try again.";
-
-                return View();
+                return BadRequest(ModelState);
             }
 
             var result = await _service.Find(id);
@@ -267,7 +263,7 @@ namespace MVC_Identity.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> RemovePeople([FromBody]RemovePeopleFromCity remove)
+        public async Task<IActionResult> RemovePeople([FromForm]RemovePeopleFromCity remove)
         {
             if (remove.CityId == Guid.Empty)
             {

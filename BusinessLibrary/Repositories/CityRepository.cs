@@ -165,22 +165,20 @@ namespace BusinessLibrary.Repositories
                 }
 
                 // adds a person to the city for each id in the list.
-                /// <summary>
-                /// foreach (var id in personId)
-                /// {
-                ///     var person = await _db.People.SingleOrDefaultAsync(x => x.Id == id);
-                ///     if (!city.People.Contains(person))
-                ///     {
-                ///         city.People.Add(person);
-                ///     }
-                /// }
-                /// </summary>
-                personId.ForEach(
-                    async x =>
-                        city.People.Add(
-                            !city.People.Contains( // Stops duplicates from being added.
-                                await _db.People.SingleOrDefaultAsync(c => c.Id == x)) ?
-                                    await _db.People.SingleOrDefaultAsync(c => c.Id == x) : null)); // Else do nothing.
+                foreach (var id in personId)
+                {
+                    var person = await _db.People.SingleOrDefaultAsync(x => x.Id == id) ?? throw new Exception();
+                    if (!city.People.Contains(person))
+                    {
+                        city.People.Add(person);
+                    }
+                }
+                //personId.ForEach(
+                //    async x =>
+                //        city.People.Add(
+                //            !city.People.Contains( // Stops duplicates from being added.
+                //                await _db.People.SingleOrDefaultAsync(c => c.Id == x)) ?
+                //                    await _db.People.SingleOrDefaultAsync(c => c.Id == x) : null)); // Else do nothing.
 
                 await _db.SaveChangesAsync();
 
@@ -220,6 +218,15 @@ namespace BusinessLibrary.Repositories
                     return new CityWithMessage { Message = ActionMessages.NotFound };
                 }
 
+                foreach (var personId in remove.PeopleId)
+                {
+                    var person = await _db.People.SingleOrDefaultAsync(x => x.Id == personId) ?? throw new Exception();
+
+                    if (city.People.Contains(person))
+                    {
+                        city.People.Remove(person);
+                    }
+                }
                 // Removes the correct person for every Id in the personId list.
                 remove.PeopleId.ForEach(
                     async x =>
