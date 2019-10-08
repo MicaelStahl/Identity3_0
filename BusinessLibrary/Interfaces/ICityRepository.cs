@@ -19,6 +19,8 @@ namespace BusinessLibrary.Interfaces
 
         Task<CityWithMessage> AddPeople(Guid cityId, List<Guid> personId); // Redirects to details
 
+        Task<CityWithMessage> RemovePeople(RemovePeopleFromCity remove);
+
         Task<ActionMessages> Delete(Guid id);
     }
 }

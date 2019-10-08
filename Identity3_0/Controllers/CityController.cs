@@ -5,10 +5,12 @@ using System.Threading.Tasks;
 using BusinessLibrary.Interfaces;
 using DataAccessLibrary.Models;
 using DataAccessLibrary.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MVC_Identity.Controllers
 {
+    //[Authorize(Roles = "Administrator")]
     public class CityController : Controller
     {
         #region D.I
@@ -69,6 +71,8 @@ namespace MVC_Identity.Controllers
 
         #endregion Create
 
+        #region Details
+
         [HttpGet]
         public async Task<IActionResult> Details(Guid id, bool updated = false)
         {
@@ -100,6 +104,10 @@ namespace MVC_Identity.Controllers
                 return BadRequest();
             }
         }
+
+        #endregion Details
+
+        #region Edit
 
         [HttpGet]
         public async Task<IActionResult> Edit(Guid id)
@@ -158,6 +166,8 @@ namespace MVC_Identity.Controllers
             }
         }
 
+        #region AddPeople
+
         [HttpGet]
         public async Task<IActionResult> AddPeople(Guid id)
         {
@@ -172,7 +182,7 @@ namespace MVC_Identity.Controllers
 
             if (result.Message == ActionMessages.Success)
             {
-                return View(); // Create new viewmodel here for 1 City with a list of homeless people
+                return View(new AddPeopleToCity { CityId = result.City.Id, Homeless = await _list.HomelessPeople() });
             }
             else if (result.Message == ActionMessages.NotFound)
             {
@@ -185,5 +195,174 @@ namespace MVC_Identity.Controllers
                 return BadRequest();
             }
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddPeople(AddPeopleToCityVM city)
+        {
+            if (city.CityId == Guid.Empty)
+            {
+                ModelState.AddModelError(string.Empty, "The Id could not be fetched.");
+
+                ViewBag.message = "Something went wrong. Please try again.";
+
+                return View();
+            }
+
+            var result = await _service.AddPeople(city.CityId, city.PeopleId);
+
+            if (result.Message == ActionMessages.Updated)
+            {
+                return RedirectToAction(nameof(Details), "City", new { id = result.City.Id, updated = true });
+            }
+            else if (result.Message == ActionMessages.NotFound)
+            {
+                ModelState.AddModelError(string.Empty, "Could not find the requested city.");
+
+                return NotFound(ModelState);
+            }
+            else
+            {
+                ModelState.AddModelError(string.Empty, result.Message.ToString());
+
+                return BadRequest(ModelState);
+            }
+        }
+
+        #endregion AddPeople
+
+        #region RemovePeople
+
+        [HttpGet]
+        public async Task<IActionResult> RemovePeople(Guid id)
+        {
+            if (id == Guid.Empty)
+            {
+                ModelState.AddModelError(string.Empty, "The Id could not be fetched.");
+
+                ViewBag.message = "Something went wrong. Please try again.";
+
+                return View();
+            }
+
+            var result = await _service.Find(id);
+
+            if (result.Message == ActionMessages.Success)
+            {
+                return View(result.City);
+            }
+            else if (result.Message == ActionMessages.NotFound)
+            {
+                ModelState.AddModelError(string.Empty, "Could not find the requested city.");
+
+                return NotFound(ModelState);
+            }
+            else
+            {
+                ModelState.AddModelError(string.Empty, $"Error type: {result.Message.ToString()}");
+
+                return BadRequest(ModelState);
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RemovePeople([FromBody]RemovePeopleFromCity remove)
+        {
+            if (remove.CityId == Guid.Empty)
+            {
+                ModelState.AddModelError(string.Empty, "The Id could not be fetched.");
+
+                return BadRequest(ModelState);
+            }
+
+            var result = await _service.RemovePeople(remove);
+
+            if (result.Message == ActionMessages.Updated)
+            {
+                return RedirectToAction(nameof(Details), "City", new { id = result.City.Id, updated = true });
+            }
+            else if (result.Message == ActionMessages.NotFound)
+            {
+                ModelState.AddModelError(string.Empty, "The requested city could not be found.");
+
+                return NotFound(ModelState);
+            }
+            else
+            {
+                ModelState.AddModelError(string.Empty, $"Error Type: {result.Message.ToString()}");
+
+                return BadRequest(ModelState);
+            }
+        }
+
+        #endregion RemovePeople
+
+        #endregion Edit
+
+        #region Delete
+
+        [HttpGet]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            if (id == Guid.Empty)
+            {
+                ModelState.AddModelError(string.Empty, "The Id Could not be fetched.");
+
+                return BadRequest(ModelState);
+            }
+
+            var result = await _service.Find(id);
+
+            if (result.Message == ActionMessages.Success)
+            {
+                return View(result.City);
+            }
+            else if (result.Message == ActionMessages.NotFound)
+            {
+                ModelState.AddModelError(string.Empty, "Could not find the requested city.");
+
+                return NotFound(ModelState);
+            }
+            else
+            {
+                ModelState.AddModelError(string.Empty, $"Error Type: {result.Message.ToString()}");
+
+                return BadRequest(ModelState);
+            }
+        }
+
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(Guid id)
+        {
+            if (id == Guid.Empty)
+            {
+                ModelState.AddModelError(string.Empty, "The Id Could not be fetched.");
+
+                return BadRequest(ModelState);
+            }
+
+            var result = await _service.Delete(id);
+
+            if (result == ActionMessages.Deleted)
+            {
+                return RedirectToAction(nameof(Index), "City", new { message = result.ToString() });
+            }
+            else if (result == ActionMessages.NotFound)
+            {
+                ModelState.AddModelError(string.Empty, "The requested city was not found.");
+
+                return NotFound(ModelState);
+            }
+            else
+            {
+                ModelState.AddModelError(string.Empty, $"Error Type: {result.ToString()}");
+
+                return BadRequest(ModelState);
+            }
+        }
+
+        #endregion Delete
     }
 }

@@ -27,13 +27,19 @@
                             <a class="nav-link btn text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link btn text-dark" asp-controller="Home" asp-action="School">School</a>
+                            <a class="nav-link btn text-dark" asp-controller="Home" asp-action="World">World</a>
                         </li>
-                        @if (Url.RouteUrl(Url).Contains("/School"))
+                        @if (Url.RouteUrl(Url).Contains("/World"))
                         {
                             <li class="nav-item">
-                                <a class="nav-link btn text-dark" asp-controller="Person" asp-action="Index">Student</a>
+                                <a class="nav-link btn text-dark" asp-controller="Person" asp-action="Index">People</a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link btn text-dark" asp-controller="City" asp-action="Index">Cities</a>
+                            </li>
+                            @*@if (User.IsInRole("Administrator"))*@
+                            //{
+                            //}
                         }
                     </ul>
                     <ul class="navbar-nav ml-auto">

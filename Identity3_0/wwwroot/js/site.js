@@ -26,3 +26,7 @@ $("#EmailRegistration").on("focusout", function () {
         throw new Error(error);
     })
 });
+
+if ($(".updatedText").val() !== null) {
+    setTimeout(() => $(".updatedText").fadeOut(), 3000)
+}

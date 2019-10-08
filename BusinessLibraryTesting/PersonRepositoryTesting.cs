@@ -187,10 +187,12 @@ namespace BusinessLibraryTesting
         {
             var person = OneValidPerson();
             // This indicates a person already exists with the given ID and is now being updated with the given data.
-            _service.Setup(x => x.Edit(person, Guid.Empty)).ReturnsAsync(ActionMessages.Updated);
+            _service.Setup(x => x.Edit(person, Guid.Empty)).ReturnsAsync(new PersonWithMessage { Person = person, Message = ActionMessages.Updated });
+
+            var result = await _service.Object.Edit(person, Guid.Empty);
 
             // And this verifies that claim.
-            Assert.Equal(ActionMessages.Updated, await _service.Object.Edit(person, Guid.Empty));
+            Assert.Equal(ActionMessages.Updated, result.Message);
         }
 
         [Fact]
@@ -199,10 +201,12 @@ namespace BusinessLibraryTesting
         {
             var person = OneInvalidPerson();
             // This indicates a person already exists with the given ID and is now being updated with the given data.
-            _service.Setup(x => x.Edit(person, Guid.Empty)).Returns(Task.FromResult(ActionMessages.FillAllFields));
+            _service.Setup(x => x.Edit(person, Guid.Empty)).Returns(Task.FromResult(new PersonWithMessage { Message = ActionMessages.FillAllFields }));
+
+            var result = await _service.Object.Edit(person, Guid.Empty);
 
             // And this verifies that claim.
-            Assert.Equal(ActionMessages.FillAllFields, await _service.Object.Edit(person, Guid.Empty));
+            Assert.Equal(ActionMessages.FillAllFields, result.Message);
         }
 
         [Fact]

@@ -1,0 +1,40 @@
+﻿@model CityListWithMessage
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>List of cities</h1>
+<hr />
+<partial name="_GoBackButton" />
+
+<div class="col-8 shadow border mt-3">
+    @if (ViewBag.message != null)
+    {
+        <div class="container text-success font-weight-bold updatedText">@ViewBag.message</div>
+    }
+    @if (Model.Cities == null || Model.Cities.Count == 0)
+    {
+        <div class="font-weight-bold">No cities could be found in the database. Please try again later.</div>
+    }
+    else
+    {
+        <table class="table table-active table-striped table-hover rounded mt-3">
+            <caption>List of all cities</caption>
+            <thead>
+                <tr class="d-table-row">
+                    <th class="d-table-cell">Name</th>
+                    <th class="d-table-cell">Population</th>
+                    <th class="d-table-cell">Postal code</th>
+                    <th class="d-table-cell">Country</th>
+                    <th class="d-table-cell">Options</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var city in Model.Cities)
+                {
+                    <partial name="_city" model="city" />
+                }
+            </tbody>
+        </table>
+    }
+</div>

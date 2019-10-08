@@ -1,0 +1,14 @@
+﻿@model City
+@*
+    For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
+*@
+
+<tr class="d-table-row">
+    <td class="d-table-cell">@Model.Name</td>
+    <td class="d-table-cell">@Model.Population</td>
+    <td class="d-table-cell">@Model.PostalCode</td>
+    <td class="d-table-cell">@Model.Country.Name</td>
+    <td class="d-table-cell">
+        <partial name="_EDD_Buttons" model="Model.Id" />
+    </td>
+</tr>

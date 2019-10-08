@@ -30,5 +30,34 @@ namespace DataAccessLibrary.ViewModels
         public ActionMessages Message { get; set; }
 
         public Dictionary<Guid, string> Countries { get; set; } = new Dictionary<Guid, string>();
+
+        public Guid CountryId { get; set; }
+    }
+
+    /// <summary>
+    /// The GET for adding people
+    /// </summary>
+    public class AddPeopleToCity
+    {
+        public Guid CityId { get; set; }
+
+        public List<Person> Homeless { get; set; } = new List<Person>();
+    }
+
+    /// <summary>
+    /// The POST for adding people.
+    /// </summary>
+    public class AddPeopleToCityVM
+    {
+        public Guid CityId { get; set; }
+
+        public List<Guid> PeopleId { get; set; } = new List<Guid>();
+    }
+
+    public class RemovePeopleFromCity
+    {
+        public Guid CityId { get; set; }
+
+        public List<Guid> PeopleId { get; set; } = new List<Guid>();
     }
 }

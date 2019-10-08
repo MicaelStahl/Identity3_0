@@ -1,0 +1,45 @@
+﻿@model CityCreation
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Create new city</h1>
+<hr />
+<partial name="_GoBackButton" />
+
+<div class="border col-3 shadow">
+    <form asp-action="Create" asp-controller="City">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="text-danger font-weight-bold"></div>
+        <div class="form-group">
+            <label class="control-label" asp-for="City.Name"></label>
+            <input asp-for="City.Name" class="form-control" autofocus />
+            <span asp-validation-for="City.Name" class="text-danger font-weight-bold"></span>
+        </div>
+        <div class="form-group">
+            <label class="control-label" asp-for="City.Population"></label>
+            <input asp-for="City.Population" class="form-control" />
+            <span asp-validation-for="City.Population" class="text-danger font-weight-bold"></span>
+        </div>
+        <div class="form-group">
+            <label class="control-label" asp-for="City.PostalCode"></label>
+            <input asp-for="City.PostalCode" class="form-control" />
+            <span asp-validation-for="City.PostalCode" class="text-danger font-weight-bold"></span>
+        </div>
+        <div class="form-group">
+            <label class="control-label" asp-for="City.Country"></label>
+            <select asp-for="CountryId" class="form-control">
+
+                <option value="@null">None</option>
+
+                @foreach (var country in Model.Countries)
+                {
+                    <option value="@country.Key">@country.Value</option>
+                }
+            </select>
+        </div>
+        <div class="form-group">
+            <input type="submit" value="Submit" class="btn btn-primary btn-sm mb-2" />
+        </div>
+    </form>
+</div>

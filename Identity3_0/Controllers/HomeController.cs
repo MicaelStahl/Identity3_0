@@ -28,7 +28,7 @@ namespace Identity3_0.Controllers
             return View();
         }
 
-        public IActionResult School()
+        public IActionResult World()
         {
             return View();
         }

@@ -165,13 +165,22 @@ namespace BusinessLibrary.Repositories
                 }
 
                 // adds a person to the city for each id in the list.
-                //
-                // Summary:
-                // foreach (var id in personId)
-                // {
-                //   city.People.add(await _db.People.SingleOrDefaultAsync(x => x.Id == id);
-                // }
-                personId.ForEach(async x => city.People.Add(await _db.People.SingleOrDefaultAsync(c => c.Id == x)));
+                /// <summary>
+                /// foreach (var id in personId)
+                /// {
+                ///     var person = await _db.People.SingleOrDefaultAsync(x => x.Id == id);
+                ///     if (!city.People.Contains(person))
+                ///     {
+                ///         city.People.Add(person);
+                ///     }
+                /// }
+                /// </summary>
+                personId.ForEach(
+                    async x =>
+                        city.People.Add(
+                            !city.People.Contains( // Stops duplicates from being added.
+                                await _db.People.SingleOrDefaultAsync(c => c.Id == x)) ?
+                                    await _db.People.SingleOrDefaultAsync(c => c.Id == x) : null)); // Else do nothing.
 
                 await _db.SaveChangesAsync();
 
@@ -184,6 +193,52 @@ namespace BusinessLibrary.Repositories
         }
 
         #endregion AddPeople
+
+        #region RemovePeople
+
+        public async Task<CityWithMessage> RemovePeople(RemovePeopleFromCity remove)
+        {
+            try
+            {
+                if (remove.CityId == Guid.Empty)
+                {
+                    throw new Exception();
+                }
+
+                if (remove.PeopleId == null || remove.PeopleId.Count == 0)
+                {
+                    return new CityWithMessage { Message = ActionMessages.Empty };
+                }
+
+                var city = await _db.Cities
+                    .Include(x => x.People) // IMPORTANT: Forget this and it won't remove any people.
+                    .Include(x => x.Country) // And this for the View.
+                    .SingleOrDefaultAsync(x => x.Id == remove.CityId);
+
+                if (city == null)
+                {
+                    return new CityWithMessage { Message = ActionMessages.NotFound };
+                }
+
+                // Removes the correct person for every Id in the personId list.
+                remove.PeopleId.ForEach(
+                    async x =>
+                        city.People.Remove(
+                            city.People.Contains( // Checks that the person actually exists in the city.
+                                await _db.People.SingleOrDefaultAsync(c => c.Id == x)) ?
+                                    await _db.People.SingleOrDefaultAsync(c => c.Id == x) : null)); // Else do nothing.
+
+                await _db.SaveChangesAsync();
+
+                return new CityWithMessage { City = city, Message = ActionMessages.Success };
+            }
+            catch (Exception)
+            {
+                return new CityWithMessage { Message = ActionMessages.Failed };
+            }
+        }
+
+        #endregion RemovePeople
 
         #endregion Edit
 

@@ -1,0 +1,80 @@
+﻿@model City
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1>Details of @Model.Name</h1>
+<hr />
+<partial name="_GoBackButton" />
+
+<div class="mt-3 col-12">
+    <div class="shadow border col-3 float-left">
+
+        @if (ViewBag.message != null)
+        {
+            <div class="text-success font-weight-bold updatedText">@ViewBag.message</div>
+        }
+
+        <h1>Details</h1>
+        <hr />
+        <div class="form-group">
+            <label class="font-weight-bold" asp-for="Name"></label>
+            <div>@Model.Name</div>
+        </div>
+        <div class="form-group">
+            <label class="font-weight-bold" asp-for="Population"></label>
+            <div>@Model.Population</div>
+        </div>
+        <div class="form-group">
+            <label class="font-weight-bold" asp-for="PostalCode"></label>
+            <div>@Model.PostalCode</div>
+        </div>
+        <div class="form-group">
+            <label class="font-weight-bold" asp-for="Country"></label>
+            <div>@Model.Country.Name</div>
+        </div>
+    </div>
+    <div class="shadow border col-2 ml-2 mr-2 float-left">
+        <div class="btn-group">
+            <ul class="list-unstyled">
+                <li><a asp-route-id="@Model.Id" asp-action="Edit" asp-controller="City">Edit</a></li>
+                <li><a asp-route-id="@Model.Id" asp-action="AddPeople" asp-controller="City">Add People</a></li>
+                <li><a asp-route-id="@Model.Id" asp-action="RemovePeople" asp-controller="City">Remove People</a></li>
+                <li><a asp-route-id="@Model.Id" asp-action="Delete" asp-controller="City">Delete</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="shadow border col-6 float-left">
+        <h1>List of people in @Model.Name</h1>
+        <hr />
+
+        @if (Model.People == null || Model.People.Count == 0)
+        {
+            <div class="text-danger font-weight-bold">No People exists in this ghost-town.</div>
+        }
+        else
+        {
+            <table class="table table-active table-striped table-hover rounded">
+                <thead>
+                    <tr class="d-table-row">
+                        <th class="d-table-cell">Name</th>
+                        <th class="d-table-cell">Age</th>
+                        <th class="d-table-cell">Email</th>
+                        <th class="d-table-cell">Phonenumber</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var person in Model.People)
+                    {
+                        <tr class="d-table-row">
+                            <td class="d-table-cell">@person.FirstName @person.LastName</td>
+                            <td class="d-table-cell">@person.Age</td>
+                            <td class="d-table-cell">@person.Email</td>
+                            <td class="d-table-cell">@person.PhoneNumber</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
