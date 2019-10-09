@@ -81,6 +81,9 @@ namespace DataAccessLibrary.ViewModels
         [DataType(DataType.Password)]
         [StringLength(20, MinimumLength = 8, ErrorMessage = "The password cannot exceed 20 characters nor be less than 8.")]
         public string Password { get; set; }
+
+        [Display(Name = "Remember me?")]
+        public bool RememberMe { get; set; }
     }
 
     /// <summary>

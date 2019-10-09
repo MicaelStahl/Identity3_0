@@ -18,10 +18,12 @@ namespace BusinessLibrary.Repositories
         #region D.I
 
         private readonly Identity3_0DbContext _db;
+        private readonly DictionaryMessages _dictionary;
 
         public GlobalRepository(Identity3_0DbContext db)
         {
             _db = db;
+            _dictionary = new DictionaryMessages();
         }
 
         #endregion D.I

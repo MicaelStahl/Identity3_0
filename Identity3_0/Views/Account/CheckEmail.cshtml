@@ -1,0 +1,11 @@
+﻿@{
+    ViewData["Title"] = "CheckEmail";
+}
+
+<h1>Check email</h1>
+<hr />
+<p>Please check your inbox to confirm your account.</p>
+<p>
+    If the email has not shown up in 30 seconds, then please check your spam folder or click
+    <a asp-action="ResendEmailVerification" asp-controller="Account" asp-route-userId="@ViewBag.userId">here</a>
+</p>

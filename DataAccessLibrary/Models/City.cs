@@ -20,7 +20,7 @@ namespace DataAccessLibrary.Models
         public string Population { get; set; }
 
         [Required]
-        [RegularExpression(@"^\d{1,8}\-{0,1}\d{0,8}$", ErrorMessage = "Valid Patterns: xxxxx-xxxxx, xxxxx")]
+        [RegularExpression(@"^\d{1,8}\-{0,1}\d{0,8}$", ErrorMessage = "Valid Patterns: xxxxx & xxxxx-xxxxx \nMin length: x or x-x \nMax length: xxxxxxxx or xxxxxxxx-xxxxxxxx ")]
         [StringLength(15, MinimumLength = 4, ErrorMessage = "The postalcode cannot exceed 8 character-length nor be less than 4 character-length.")]
         public string PostalCode { get; set; }
 

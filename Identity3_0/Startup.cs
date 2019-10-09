@@ -18,6 +18,8 @@ using Microsoft.Extensions.Hosting;
 using System.Text.Json.Serialization;
 using BusinessLibrary.Interfaces;
 using BusinessLibrary.Repositories;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using DataAccessLibrary.Models;
 
 namespace Identity3_0
 {
@@ -42,8 +44,14 @@ namespace Identity3_0
             services.AddScoped<ICityRepository, CityRepository>();
             services.AddScoped<IGlobalRepository, GlobalRepository>();
             services.AddScoped<IAccountValidation, AccountValidation>();
+            services.AddSingleton<IEmailSender, EmailSender>();
 
-            services.AddIdentity<AppUser, IdentityRole>()
+            services.Configure<EmailSettings>(Configuration.GetSection("EmailSettings"));
+
+            services.AddIdentity<AppUser, IdentityRole>(options =>
+            {
+                options.User.RequireUniqueEmail = true;
+            })
                 .AddEntityFrameworkStores<Identity3_0DbContext>()
                 .AddDefaultTokenProviders();
 
@@ -95,7 +103,7 @@ namespace Identity3_0
                     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
                     options.JsonSerializerOptions.IgnoreNullValues = true;
                 })
-                .SetCompatibilityVersion(Microsoft.AspNetCore.Mvc.CompatibilityVersion.Version_3_0);
+                .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

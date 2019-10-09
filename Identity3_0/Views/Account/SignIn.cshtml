@@ -23,6 +23,10 @@
             <span class="text-danger font-weight-bold" asp-validation-for="Password"></span>
         </div>
         <div class="form-group">
+            <input asp-for="RememberMe" />
+            <label asp-for="RememberMe"></label>
+        </div>
+        <div class="form-group">
             <input type="submit" value="Submit" class="btn btn-primary btn-sm" />
             <div class="float-right">Not registered? <a asp-action="Register" asp-controller="Account">Register</a></div>
         </div>

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -34,6 +35,31 @@ namespace MVC_Identity.Controllers
             return View();
         }
 
+        #region EmailValidation
+
+        [AllowAnonymous]
+        public IActionResult CheckEmail(string userId)
+        {
+            ViewBag.userId = userId;
+            return View();
+        }
+
+        public async Task<IActionResult> ResendEmailVerification(string userId)
+        {
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                ModelState.AddModelError(string.Empty, "Something went wrong.");
+
+                return RedirectToAction(nameof(Index)); // Change this sometime.
+            }
+
+            // Continue here https://www.codeproject.com/Articles/1272172/Require-Confirmed-Email-in-ASP-NET-Core-2-2-Part-1
+
+            return RedirectToAction(nameof(CheckEmail), new { userId });
+        }
+
+        #endregion EmailValidation
+
         #region SignIn / SignOut
 
         [HttpGet]
@@ -54,7 +80,7 @@ namespace MVC_Identity.Controllers
             }
             var appUser = await _userManager.FindByNameAsync(user.Email);
 
-            var result = await _signInManager.PasswordSignInAsync(appUser, user.Password, false, false);
+            var result = await _signInManager.PasswordSignInAsync(appUser, user.Password, user.RememberMe, false);
 
             if (result.Succeeded)
             {
@@ -127,7 +153,7 @@ namespace MVC_Identity.Controllers
 
                     // Checks if the IsAdmin value is true and adds the user to the administrator role if it is.
                     var roleResult = user.IsAdmin ?
-                        await _userManager.AddToRolesAsync(user, new List<string> { "Administrator", "NormalUser" }) :
+                        await _userManager.AddToRolesAsync(user, new string[] { "Administrator", "NormalUser" }) :
                         await _userManager.AddToRoleAsync(user, "NormalUser");
 
                     // If user is administrator, then return to same view incase admin wants to create more users.
@@ -136,7 +162,7 @@ namespace MVC_Identity.Controllers
                         return RedirectToAction(nameof(Register), new { created = true }); // Allows the admin to create more users.
                     }
 
-                    return RedirectToAction(nameof(SignIn)); // Redirect to SignIn so user can sign in.
+                    return RedirectToAction(nameof(CheckEmail), new { userId = user.Id }); // Redirect to CheckEmail so user will feel implied to verify the email.
                 }
                 else
                 {
@@ -185,6 +211,13 @@ namespace MVC_Identity.Controllers
             }
 
             return View(new FrontUser { Id = user.Id, FirstName = user.FirstName, LastName = user.LastName, Age = user.Age, Email = user.Email, IsAdmin = user.IsAdmin, PhoneNumber = user.PhoneNumber });
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "Administrator")]
+        public async Task<IActionResult> Users()
+        {
+            return View(await _userManager.Users.ToListAsync());
         }
 
         #endregion Find
