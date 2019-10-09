@@ -6,11 +6,13 @@ using System.Threading.Tasks;
 using BusinessLibrary.Interfaces;
 using DataAccessLibrary.Models;
 using DataAccessLibrary.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Identity3_0.Controllers
 {
-    [Route("[controller]/[action]")]
+    [Route("World/[controller]/[action]")]
+    [Authorize]
     public class PersonController : Controller
     {
         private readonly IPersonRepository _service;
@@ -34,6 +36,7 @@ namespace Identity3_0.Controllers
             //return Enum.GetName(typeof(ActionMessages), message);
         }
 
+        [AllowAnonymous]
         public async Task<IActionResult> Index(string message = null)
         {
             if (!string.IsNullOrWhiteSpace(message))
@@ -88,6 +91,7 @@ namespace Identity3_0.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> Details(Guid id, bool updated = false)
         {
             try

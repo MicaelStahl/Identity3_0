@@ -7,24 +7,24 @@
 <hr />
 <partial name="_GoBackButton" />
 
-<div class="border col-3 shadow">
+<div class="shadow border col-3">
     <form asp-action="Create" asp-controller="City">
         @Html.AntiForgeryToken()
         <div asp-validation-summary="ModelOnly" class="text-danger font-weight-bold"></div>
         <div class="form-group">
             <label class="control-label" asp-for="City.Name"></label>
-            <input asp-for="City.Name" class="form-control" autofocus />
-            <span asp-validation-for="City.Name" class="text-danger font-weight-bold"></span>
+            <input class="form-control" asp-for="City.Name" autofocus placeholder="Name" />
+            <span class="text-danger font-weight-bold" asp-validation-for="City.Name"></span>
         </div>
         <div class="form-group">
             <label class="control-label" asp-for="City.Population"></label>
-            <input asp-for="City.Population" class="form-control" />
-            <span asp-validation-for="City.Population" class="text-danger font-weight-bold"></span>
+            <input class="form-control" asp-for="City.Population" type="number" placeholder="Population" />
+            <span class="text-danger font-weight-bold" asp-validation-for="City.Population"></span>
         </div>
         <div class="form-group">
             <label class="control-label" asp-for="City.PostalCode"></label>
-            <input asp-for="City.PostalCode" class="form-control" />
-            <span asp-validation-for="City.PostalCode" class="text-danger font-weight-bold"></span>
+            <input class="form-control" asp-for="City.PostalCode" placeholder="Postal code" />
+            <span class="text-danger font-weight-bold" asp-validation-for="City.PostalCode"></span>
         </div>
         <div class="form-group">
             <label class="control-label" asp-for="City.Country"></label>

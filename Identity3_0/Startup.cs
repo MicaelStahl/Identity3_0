@@ -127,6 +127,15 @@ namespace Identity3_0
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
+                endpoints.MapControllerRoute(
+                    name: "Person",
+                    pattern: "World/{controller=Person}/{action=Index}/{id?}");
+                endpoints.MapControllerRoute(
+                    name: "City",
+                    pattern: "World/{controller=City}/{action=Index}/{id?}");
+                endpoints.MapControllerRoute(
+                    name: "Country",
+                    pattern: "World/{controller=Country}/{action=Index}/{id?}");
             });
         }
     }

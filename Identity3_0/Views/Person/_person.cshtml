@@ -20,7 +20,16 @@
             @Model.City.Name
         </td>
     }
-    <td class="d-table-cell">
-        <partial name="_EDD_Buttons" model="@Model.Id" />
-    </td>
+    @if (User.Identity.IsAuthenticated)
+    { // This will be used for Person/City/Country and also Account handling.
+        <td class="d-table-cell">
+            <partial name="_EDD_Buttons" model="@Model.Id" />
+        </td>
+    }
+    else
+    { // This will only be used for Person when the user is not signed in.
+        <td class="d-table-cell">
+            <a asp-action="Details" asp-route-id="@Model.Id"><i class="fas fa-info-circle"></i></a>
+        </td>
+    }
 </tr>

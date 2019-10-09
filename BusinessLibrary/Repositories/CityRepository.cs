@@ -173,12 +173,6 @@ namespace BusinessLibrary.Repositories
                         city.People.Add(person);
                     }
                 }
-                //personId.ForEach(
-                //    async x =>
-                //        city.People.Add(
-                //            !city.People.Contains( // Stops duplicates from being added.
-                //                await _db.People.SingleOrDefaultAsync(c => c.Id == x)) ?
-                //                    await _db.People.SingleOrDefaultAsync(c => c.Id == x) : null)); // Else do nothing.
 
                 await _db.SaveChangesAsync();
 
@@ -227,17 +221,10 @@ namespace BusinessLibrary.Repositories
                         city.People.Remove(person);
                     }
                 }
-                // Removes the correct person for every Id in the personId list.
-                remove.PeopleId.ForEach(
-                    async x =>
-                        city.People.Remove(
-                            city.People.Contains( // Checks that the person actually exists in the city.
-                                await _db.People.SingleOrDefaultAsync(c => c.Id == x)) ?
-                                    await _db.People.SingleOrDefaultAsync(c => c.Id == x) : null)); // Else do nothing.
 
                 await _db.SaveChangesAsync();
 
-                return new CityWithMessage { City = city, Message = ActionMessages.Success };
+                return new CityWithMessage { City = city, Message = ActionMessages.Updated };
             }
             catch (Exception)
             {

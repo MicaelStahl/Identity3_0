@@ -4,4 +4,7 @@
 *@
 
 @{ /* &nbsp; == A space. This means Hello&nbsp;World becomes Hello World. */}
-<a asp-route-id="@Model" asp-action="Edit">Edit</a> &nbsp; | &nbsp; <a asp-route-id="@Model" asp-action="Delete">Delete</a>
+@if (User.Identity.IsAuthenticated)
+{
+    <a asp-route-id="@Model" asp-action="Edit">Edit</a> <div>&nbsp; | &nbsp;</div> <a asp-route-id="@Model" asp-action="Delete">Delete</a>
+}

@@ -10,7 +10,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace MVC_Identity.Controllers
 {
-    //[Authorize(Roles = "Administrator")]
+    [Route("World/[controller]/[action]")]
+    [Authorize(Roles = "Administrator")]
     public class CityController : Controller
     {
         #region D.I
@@ -48,9 +49,16 @@ namespace MVC_Identity.Controllers
         {
             if (!ModelState.IsValid)
             {
-                ModelState.AddModelError(string.Empty, "All fields were not filled.");
+                if (string.IsNullOrWhiteSpace(city.Name) || string.IsNullOrWhiteSpace(city.Population) || string.IsNullOrWhiteSpace(city.PostalCode))
+                {
+                    ModelState.AddModelError(string.Empty, "All fields were not filled.");
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, "Invalid input. Please check the fields and try again.");
+                }
 
-                return BadRequest(ModelState);
+                return View(new CityCreation { Countries = await _list.GetCountries(), City = city });
             }
 
             var result = await _service.Create(city, countryId);

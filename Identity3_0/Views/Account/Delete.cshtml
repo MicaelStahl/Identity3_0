@@ -7,11 +7,11 @@
 
 <h1>Delete @Model.FirstName</h1>
 <hr />
-<partial name="_GoBackButton" />
 
-<div class="float-right">
-    <p>Are you sure you want to delete @Model.FirstName? This action cannot be reverted.</p>
-    <form asp-action="Delete" asp-controller="Account">
+<div>
+    <partial name="_GoBackButton" />
+    <p class="text-danger font-weight-bold float-right">Are you sure you want to delete @Model.FirstName? This action cannot be reverted.</p>
+    <form class="float-right" asp-action="Delete" asp-controller="Account" asp-route-id="@Model.Id">
         @Html.AntiForgeryToken()
         <input type="submit" value="Delete" class="btn btn-danger ml-1" />
     </form>

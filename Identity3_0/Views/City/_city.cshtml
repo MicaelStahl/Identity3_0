@@ -7,7 +7,14 @@
     <td class="d-table-cell">@Model.Name</td>
     <td class="d-table-cell">@Model.Population</td>
     <td class="d-table-cell">@Model.PostalCode</td>
-    <td class="d-table-cell">@Model.Country.Name</td>
+    @if (Model.Country == null)
+    {
+        <td class="d-table-cell">None</td>
+    }
+    else
+    {
+        <td class="d-table-cell">@Model.Country.Name</td>
+    }
     <td class="d-table-cell">
         <partial name="_EDD_Buttons" model="Model.Id" />
     </td>

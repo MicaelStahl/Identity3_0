@@ -11,27 +11,27 @@
 <partial name="_GoBackButton" />
 
 <div class="shadow border col-3">
-    <form asp-action="Edit" asp-controller="">
+    <form asp-action="Edit" asp-controller="City">
         @Html.AntiForgeryToken()
         <div asp-validation-summary="ModelOnly" class="text-danger font-weight-bold"></div>
         <div class="form-group">
-            <label asp-for="City.Name"></label>
-            <input asp-for="City.Name" />
-            <span asp-validation-for="City.Name" class="text-danger font-weight-bold"></span>
+            <label class="control-label" asp-for="City.Name"></label>
+            <input class="form-control" asp-for="City.Name" autofocus placeholder="Name" />
+            <span class="text-danger font-weight-bold" asp-validation-for="City.Name"></span>
         </div>
         <div class="form-group">
-            <label asp-for="City.Population"></label>
-            <input asp-for="City.Population" />
-            <span asp-validation-for="City.Population" class="text-danger font-weight-bold"></span>
+            <label class="control-label" asp-for="City.Population"></label>
+            <input class="form-control" asp-for="City.Population" type="number" placeholder="Population" pattern="([^0-9]+)([^-]{1})$" />
+            <span class="text-danger font-weight-bold" asp-validation-for="City.Population"></span>
         </div>
         <div class="form-group">
-            <label asp-for="City.PostalCode"></label>
-            <input asp-for="City.PostalCode" />
-            <span asp-validation-for="City.PostalCode" class="text-danger font-weight-bold"></span>
+            <label class="control-label" asp-for="City.PostalCode"></label>
+            <input class="form-control" asp-for="City.PostalCode" placeholder="Postal code" />
+            <span class="text-danger font-weight-bold" asp-validation-for="City.PostalCode"></span>
         </div>
         <div class="form-group">
-            <label asp-for="City.Country"></label>
-            <select>
+            <label class="control-label" asp-for="City.Country"></label>
+            <select asp-for="CountryId" class="form-control">
                 <option value="@active.Id">@active.Name</option>
                 <option value="@null">None</option>
 

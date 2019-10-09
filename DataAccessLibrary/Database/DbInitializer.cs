@@ -131,7 +131,7 @@ namespace DataAccessLibrary
             var countries = new Country[]
             {
                 new Country { Id = Guid.NewGuid(), Name = "Country1", Population = "1239875" , Cities = new City[] { cities[0], cities[1] }.ToList() },
-                new Country { Id = Guid.NewGuid(), Name = "Country1", Population = "1239875" , Cities = new City[] { cities[2], cities[3] }.ToList() },
+                new Country { Id = Guid.NewGuid(), Name = "Country2", Population = "1231234" , Cities = new City[] { cities[2], cities[3] }.ToList() },
             };
 
             context.Countries.AddRange(countries);

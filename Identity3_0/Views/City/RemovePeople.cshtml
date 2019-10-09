@@ -1,0 +1,65 @@
+﻿@model City
+@{
+    ViewData["Title"] = "RemovePeople";
+}
+
+<h1>Remove people from @Model.Name</h1>
+<hr />
+<partial name="_GoBackButton" />
+
+<div class="d-block col-12">
+    <div class="shadow border col-8">
+        <h1>Choose what people to remove from @Model.Name.</h1>
+        <hr />
+
+        @if (Model.People == null || Model.People.Count == 0)
+        {
+            <div>There are no people living in this city.</div>
+        }
+        else
+        {
+            <form asp-action="RemovePeople" asp-controller="City">
+                @Html.AntiForgeryToken()
+                <input name="CityId" value="@Model.Id" type="hidden" />
+                <div class="form-group">
+                    <table class="table table-active table-striped table-hover rounded">
+                        <caption>Citizens in @Model.Name</caption>
+                        <thead>
+                            <tr class="d-table-row">
+                                <th class="d-table-cell"></th>
+                                <th class="d-table-cell">Name</th>
+                                <th class="d-table-cell">Age</th>
+                                <th class="d-table-cell">Email</th>
+                                <th class="d-table-cell">Phonenumber</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var person in Model.People)
+                            {
+                                <tr class="d-table-row">
+                                    <td class="d-table-cell"><input type="checkbox" name="PeopleId" value="@person.Id" /></td>
+                                    <td class="d-table-cell">@person.FirstName @person.LastName</td>
+                                    <td class="d-table-cell">@person.Age</td>
+                                    <td class="d-table-cell">@person.Email</td>
+                                    <td class="d-table-cell">@person.PhoneNumber</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <div class="form-group">
+                    <input type="submit" value="Submit" class="btn btn-primary btn-sm mb-3" />
+                </div>
+            </form>
+        }
+    </div>
+</div>
+
+<div class="container">
+    <h4>Things to add later:</h4>
+    <ul>
+        <li><p>Sorting</p></li>
+        <li><p>Search function</p></li>
+        <li><p>Validation on removal (Ask if these are the ones you want to remove)</p></li>
+    </ul>
+</div>
