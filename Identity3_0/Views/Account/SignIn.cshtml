@@ -7,6 +7,12 @@
 <hr />
 
 <div class="container shadow border col-4">
+
+    @if (ViewBag.message != null)
+    {
+        <div class="text-success font-weight-bold updatedText">@ViewBag.message</div>
+    }
+
     <h1>Sign in</h1>
     <hr />
     <form asp-action="SignIn" asp-controller="Account" method="post">

@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Net;
 using System.Net.Mail;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using DataAccessLibrary.Models;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Options;
+using Microsoft.Win32.SafeHandles;
 
 namespace BusinessLibrary.Repositories
 {
@@ -48,6 +50,8 @@ namespace BusinessLibrary.Repositories
 
                 // Send it
                 client.Send(mail);
+
+                client.Dispose();
             }
             catch (Exception ex)
             {

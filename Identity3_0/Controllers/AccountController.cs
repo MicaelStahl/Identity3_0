@@ -1,12 +1,16 @@
 ﻿using DataAccessLibrary.ViewModels;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 
 namespace MVC_Identity.Controllers
@@ -21,11 +25,13 @@ namespace MVC_Identity.Controllers
 
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
+        private readonly IEmailSender _emailSender;
 
-        public AccountController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager)
+        public AccountController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IEmailSender emailSender)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _emailSender = emailSender;
         }
 
         #endregion D.I
@@ -38,24 +44,191 @@ namespace MVC_Identity.Controllers
         #region EmailValidation
 
         [AllowAnonymous]
-        public IActionResult CheckEmail(string userId)
+        public IActionResult CheckEmail()
         {
-            ViewBag.userId = userId;
             return View();
         }
 
-        public async Task<IActionResult> ResendEmailVerification(string userId)
+        /// <summary>
+        /// Only accessible for the active user. Used after registration if the registered user isn't an admin.
+        /// </summary>
+        /// <param name="email">The email to send the mail to.</param>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> SendEmailConfirmation(string email)
         {
-            if (string.IsNullOrWhiteSpace(userId))
+            if (string.IsNullOrWhiteSpace(email))
             {
-                ModelState.AddModelError(string.Empty, "Something went wrong.");
+                ModelState.AddModelError(string.Empty, $"Unexpected error occurred: The email is blank.");
 
-                return RedirectToAction(nameof(Index)); // Change this sometime.
+                return BadRequest(ModelState);
+            }
+
+            var user = await _userManager.GetUserAsync(User);
+
+            if (user == null)
+            {
+                return NotFound("And error occurred: Could not find the active user.");
+            }
+            var userEmail = await _userManager.GetEmailAsync(user);
+
+            if (userEmail != email)
+            {
+                var owner = await _userManager.FindByEmailAsync(email);
+
+                if (owner != null && !string.Equals(await _userManager.GetUserIdAsync(owner), await _userManager.GetUserIdAsync(user)))
+                {
+                    ModelState.AddModelError(string.Empty, new IdentityErrorDescriber().DuplicateEmail(email).Description);
+
+                    return NotFound($"Cannot find the active user with the given Email of {email}.");
+                }
+            }
+
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+
+            var callbackUrl = Url.ActionLink(action: nameof(ConfirmEmail), controller: "Account", values: new { userId = user.Id, token }, protocol: Request.Scheme);
+
+            await _emailSender.SendEmailAsync(email, "Confirm your email",
+                    $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+
+            return RedirectToAction(nameof(CheckEmail));
+        }
+
+        [HttpGet]
+        public IActionResult RescendEmailVerification(string error = null) // Only called from action CheckEmail.
+        {
+            if (!string.IsNullOrWhiteSpace(error))
+                ViewBag.error = error;
+
+            return View();
+        }
+
+        /// <summary>
+        /// Only accessible for the active user. Aka the admin can't do this for other users.
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> ResendEmailVerification(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                ModelState.AddModelError(string.Empty, "Unexpected error occurred: Email was blank.");
+
+                return BadRequest(ModelState); // Change this sometime.
             }
 
             // Continue here https://www.codeproject.com/Articles/1272172/Require-Confirmed-Email-in-ASP-NET-Core-2-2-Part-1
 
-            return RedirectToAction(nameof(CheckEmail), new { userId });
+            var user = await _userManager.GetUserAsync(User);
+
+            if (user == null)
+            {
+                ModelState.AddModelError(string.Empty, "The user could not be found.");
+
+                return BadRequest(ModelState);
+            }
+
+            var userEmail = await _userManager.GetEmailAsync(user);
+
+            if (userEmail != email)
+            {
+                var owner = await _userManager.FindByEmailAsync(email);
+
+                if (owner != null && !string.Equals(await _userManager.GetUserIdAsync(owner),
+                                                    await _userManager.GetUserIdAsync(user)))
+                {
+                    ModelState.AddModelError(string.Empty,
+                        new IdentityErrorDescriber()
+                        .DuplicateEmail(email)
+                        .Description);
+
+                    // Return to Home screen
+                    return RedirectToAction(nameof(Index), "Home");
+                }
+
+                // Unsure if this is correct.
+                await _userManager.SetEmailAsync(user, email);
+            }
+
+            var result = await _userManager.UpdateSecurityStampAsync(user);
+
+            if (!result.Succeeded)
+            {
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+                return RedirectToAction(nameof(Index));
+            }
+
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+
+            var callbackUrl = Url.ActionLink(
+                action: nameof(ConfirmEmail),
+                controller: "Account",
+                values: new { userId = user.Id, token },
+                protocol: Request.Scheme);
+
+            await _emailSender.SendEmailAsync(email, "Confirm your email",
+                $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+
+            return RedirectToAction(nameof(CheckEmail));
+        }
+
+        [AllowAnonymous]
+        public async Task<IActionResult> ConfirmEmail(string userId, string token)
+        {
+            if (string.IsNullOrWhiteSpace(token))
+            {
+                ModelState.AddModelError(string.Empty, new IdentityErrorDescriber().InvalidToken().Description);
+
+                return BadRequest(ModelState);
+            }
+
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user == null)
+            {
+                return NotFound($"Unable to load user with ID {user.Id}.");
+            }
+
+            var email = await _userManager.GetEmailAsync(user);
+
+            var owner = await _userManager.FindByEmailAsync(email);
+
+            if (owner != null && !string.Equals(await _userManager.GetUserIdAsync(owner), userId))
+            {
+                ModelState.AddModelError(string.Empty,
+                    new IdentityErrorDescriber()
+                    .DuplicateEmail(email)
+                    .Description);
+
+                // Return to RescendEmail
+                return RedirectToAction(nameof(RescendEmailVerification), "Account", new { userId = user.Id, error = $"Unable to load user with ID {_userManager.GetUserId(User)}." });
+            }
+
+            var result = await _userManager.ConfirmEmailAsync(user, token);
+
+            if (!result.Succeeded)
+            {
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+
+                return BadRequest(ModelState);
+            }
+            else
+            {
+                // Redirect to login if the user is not signed in.
+                if (User.Identity.IsAuthenticated)
+                {
+                    return RedirectToAction(nameof(Profile), new { email = user.Email, message = "The email was successfully confirmed." });
+                }
+                else
+                {
+                    return RedirectToAction(nameof(SignIn));
+                }
+            }
         }
 
         #endregion EmailValidation
@@ -64,8 +237,11 @@ namespace MVC_Identity.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        public IActionResult SignIn()
+        public IActionResult SignIn(string message = null)
         {
+            if (!string.IsNullOrWhiteSpace(message))
+                ViewBag.message = message;
+
             return View();
         }
 
@@ -131,7 +307,7 @@ namespace MVC_Identity.Controllers
                 {
                     ModelState.AddModelError(string.Empty, "Please fill all fields and try again.");
 
-                    return View();
+                    return View(user);
                 }
 
                 if (await _userManager.FindByEmailAsync(user.Email) != null)
@@ -140,7 +316,7 @@ namespace MVC_Identity.Controllers
 
                     ViewBag.error = "The Email is already in use.";
 
-                    return View();
+                    return View(user);
                 }
 
                 user.UserName = user.Email; // Should in theory not be needed considering the configuration for AppUser.
@@ -149,7 +325,34 @@ namespace MVC_Identity.Controllers
 
                 if (result.Succeeded)
                 {
-                    // Send an email verification here later.
+                    var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+
+                    var createdUser = await _userManager.FindByEmailAsync(user.Email);
+
+                    if (createdUser == null)
+                    {
+                        throw new InvalidOperationException("Unexpected error occured: Could not find the created user.");
+                    }
+
+                    var callbackUrl = Url.Action(new UrlActionContext
+                    {
+                        Action = nameof(ConfirmEmail),
+                        Controller = "Account",
+                        Values = new { userId = createdUser.Id, token },
+                        Protocol = Request.Scheme = "https",
+                        Host = "localhost:44351"
+                    });
+
+                    //var callbackUrl = Url.ActionLink
+                    //    (
+                    //    action: nameof(ConfirmEmail),
+                    //    controller: nameof(AccountController),
+                    //    values: new { userId = createdUser.Id, token },
+                    //    protocol: Request.Scheme
+                    //    );
+
+                    await _emailSender.SendEmailAsync(createdUser.Email, "Confirm your email",
+                            $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
 
                     // Checks if the IsAdmin value is true and adds the user to the administrator role if it is.
                     var roleResult = user.IsAdmin ?
@@ -162,7 +365,7 @@ namespace MVC_Identity.Controllers
                         return RedirectToAction(nameof(Register), new { created = true }); // Allows the admin to create more users.
                     }
 
-                    return RedirectToAction(nameof(CheckEmail), new { userId = user.Id }); // Redirect to CheckEmail so user will feel implied to verify the email.
+                    return RedirectToAction(nameof(CheckEmail)); // Redirect to CheckEmail so user will feel implied to verify the email.
                 }
                 else
                 {
@@ -174,9 +377,9 @@ namespace MVC_Identity.Controllers
                     throw new Exception();
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return BadRequest(ModelState);
+                return BadRequest(ex.Message);
             }
         }
 
@@ -185,7 +388,7 @@ namespace MVC_Identity.Controllers
         #region Find
 
         [HttpGet]
-        public async Task<IActionResult> Profile(string email)
+        public async Task<IActionResult> Profile(string email, string message = null)
         {
             if (string.IsNullOrWhiteSpace(email))
             {
@@ -209,6 +412,9 @@ namespace MVC_Identity.Controllers
 
                 return View(new FrontUser { Id = user.Id, FirstName = user.FirstName, LastName = user.LastName, Age = user.Age, Email = user.Email, IsAdmin = user.IsAdmin, PhoneNumber = user.PhoneNumber, Roles = roles.ToList() });
             }
+
+            if (!string.IsNullOrWhiteSpace(message))
+                ViewBag.message = message;
 
             return View(new FrontUser { Id = user.Id, FirstName = user.FirstName, LastName = user.LastName, Age = user.Age, Email = user.Email, IsAdmin = user.IsAdmin, PhoneNumber = user.PhoneNumber });
         }
