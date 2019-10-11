@@ -89,7 +89,7 @@ namespace MVC_Identity.Controllers
             var callbackUrl = Url.ActionLink(action: nameof(ConfirmEmail), controller: "Account", values: new { userId = user.Id, token }, protocol: Request.Scheme);
 
             await _emailSender.SendEmailAsync(email, "Confirm your email",
-                    $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                    $"<h2>Email confirmation</h2><hr />Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
 
             return RedirectToAction(nameof(CheckEmail));
         }
