@@ -15,6 +15,8 @@ namespace DataAccessLibrary.ViewModels
     public class AppUser : IdentityUser
     {
         // This automatically sets the username to be the same as the given Email.
+        //[EmailAddress]
+        //[DataType(DataType.EmailAddress)]
         //public override string UserName { get => base.UserName; set => base.UserName = Email; }
 
         [Required]

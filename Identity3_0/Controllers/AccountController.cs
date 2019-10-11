@@ -1,4 +1,5 @@
-﻿using DataAccessLibrary.ViewModels;
+﻿using BusinessLibrary.Interfaces;
+using DataAccessLibrary.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -25,9 +26,9 @@ namespace MVC_Identity.Controllers
 
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
-        private readonly IEmailSender _emailSender;
+        private readonly IEmailSenderUpdated _emailSender;
 
-        public AccountController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IEmailSender emailSender)
+        public AccountController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IEmailSenderUpdated emailSender)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -51,6 +52,7 @@ namespace MVC_Identity.Controllers
 
         /// <summary>
         /// Only accessible for the active user. Used after registration if the registered user isn't an admin.
+        /// NOTE: MIGHT NOT BE USED AT ALL
         /// </summary>
         /// <param name="email">The email to send the mail to.</param>
         /// <returns></returns>
@@ -162,11 +164,14 @@ namespace MVC_Identity.Controllers
 
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
 
-            var callbackUrl = Url.ActionLink(
-                action: nameof(ConfirmEmail),
-                controller: "Account",
-                values: new { userId = user.Id, token },
-                protocol: Request.Scheme);
+            var callbackUrl = Url.Action(new UrlActionContext
+            {
+                Action = nameof(ConfirmEmail),
+                Controller = "Account",
+                Values = new { userId = user.Id, token },
+                Protocol = Request.Scheme = "https",
+                Host = "localhost:44351"
+            });
 
             await _emailSender.SendEmailAsync(email, "Confirm your email",
                 $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
@@ -179,7 +184,10 @@ namespace MVC_Identity.Controllers
         {
             if (string.IsNullOrWhiteSpace(token))
             {
-                ModelState.AddModelError(string.Empty, new IdentityErrorDescriber().InvalidToken().Description);
+                ModelState.AddModelError(string.Empty,
+                    new IdentityErrorDescriber()
+                    .InvalidToken()
+                    .Description);
 
                 return BadRequest(ModelState);
             }
@@ -220,14 +228,17 @@ namespace MVC_Identity.Controllers
             else
             {
                 // Redirect to login if the user is not signed in.
-                if (User.Identity.IsAuthenticated)
+                if (User.Identity.IsAuthenticated && !User.IsInRole("Administrator"))
                 {
                     return RedirectToAction(nameof(Profile), new { email = user.Email, message = "The email was successfully confirmed." });
                 }
-                else
-                {
-                    return RedirectToAction(nameof(SignIn));
-                }
+
+                // If Administrator was the one sending the mail, then the user will temporarily be signed in as admin.
+                // This is to stop that.
+                if (User.IsInRole("Administrator"))
+                    await _signInManager.SignOutAsync();
+
+                return RedirectToAction(nameof(SignIn));
             }
         }
 
@@ -343,16 +354,9 @@ namespace MVC_Identity.Controllers
                         Host = "localhost:44351"
                     });
 
-                    //var callbackUrl = Url.ActionLink
-                    //    (
-                    //    action: nameof(ConfirmEmail),
-                    //    controller: nameof(AccountController),
-                    //    values: new { userId = createdUser.Id, token },
-                    //    protocol: Request.Scheme
-                    //    );
+                    var htmlMessage = await _emailSender.EmailVerificationMessage(callbackUrl, Request, Url);
 
-                    await _emailSender.SendEmailAsync(createdUser.Email, "Confirm your email",
-                            $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                    await _emailSender.SendEmailAsync(createdUser.Email, "Confirm your email", htmlMessage);
 
                     // Checks if the IsAdmin value is true and adds the user to the administrator role if it is.
                     var roleResult = user.IsAdmin ?

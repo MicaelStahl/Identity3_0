@@ -44,7 +44,7 @@ namespace Identity3_0
             services.AddScoped<ICityRepository, CityRepository>();
             services.AddScoped<IGlobalRepository, GlobalRepository>();
             services.AddScoped<IAccountValidation, AccountValidation>();
-            services.AddSingleton<IEmailSender, EmailSender>();
+            services.AddSingleton<IEmailSenderUpdated, EmailSender>();
 
             services.Configure<EmailSettings>(Configuration.GetSection("EmailSettings"));
 
