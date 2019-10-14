@@ -29,6 +29,7 @@ else
         <a class="nav-link btn text-dark" asp-action="Register" asp-controller="Account">Register</a>
     </li>
     <li class="nav-item">
-        <a class="nav-link btn text-dark" asp-action="SignIn" asp-controller="Account">Login</a>
+        @* data-toggle="modal" data-target="#signInModal" *@
+        <a class="nav-link btn text-dark" id="signInBtn" asp-action="SignIn" asp-controller="Account">Login</a>
     </li>
 }

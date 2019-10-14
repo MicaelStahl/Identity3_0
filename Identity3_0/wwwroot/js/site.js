@@ -30,3 +30,18 @@ $("#EmailRegistration").on("focusout", function () {
 if ($(".updatedText").val() !== null) {
     setTimeout(() => $(".updatedText").fadeOut(), 3000)
 }
+
+//$("#signInBtn").click(function () {
+//    $.ajax({
+//        url: "/Account/SignIn",
+//        method: "GET"
+//    }).done(function (result) {
+//        console.log(result);
+//        document.body.innerHTML = result;
+//        const options = { "backdrop": "static", keyboard: true };
+//        $("#signInModal").modal(options);
+//        $("#signInModal").modal("show");
+//    }).catch(function (err) {
+//        console.error(err);
+//    })
+//})

@@ -45,8 +45,13 @@ namespace MVC_Identity.Controllers
         #region EmailValidation
 
         [AllowAnonymous]
-        public IActionResult CheckEmail()
+        public IActionResult CheckEmail(string email)
         {
+            if (string.IsNullOrWhiteSpace(email))
+                throw new ArgumentNullException(new IdentityErrorDescriber().DefaultError().Description);
+
+            ViewBag.email = email;
+
             return View();
         }
 
@@ -94,15 +99,6 @@ namespace MVC_Identity.Controllers
                     $"<h2>Email confirmation</h2><hr />Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
 
             return RedirectToAction(nameof(CheckEmail));
-        }
-
-        [HttpGet]
-        public IActionResult RescendEmailVerification(string error = null) // Only called from action CheckEmail.
-        {
-            if (!string.IsNullOrWhiteSpace(error))
-                ViewBag.error = error;
-
-            return View();
         }
 
         /// <summary>
@@ -211,7 +207,7 @@ namespace MVC_Identity.Controllers
                     .Description);
 
                 // Return to RescendEmail
-                return RedirectToAction(nameof(RescendEmailVerification), "Account", new { userId = user.Id, error = $"Unable to load user with ID {_userManager.GetUserId(User)}." });
+                return RedirectToAction(nameof(ResendEmailVerification), "Account", new { userId = user.Id, error = $"Unable to load user with ID {_userManager.GetUserId(User)}." });
             }
 
             var result = await _userManager.ConfirmEmailAsync(user, token);
@@ -230,7 +226,7 @@ namespace MVC_Identity.Controllers
                 // Redirect to login if the user is not signed in.
                 if (User.Identity.IsAuthenticated && !User.IsInRole("Administrator"))
                 {
-                    return RedirectToAction(nameof(Profile), new { email = user.Email, message = "The email was successfully confirmed." });
+                    return RedirectToAction(nameof(Profile), new { email = user.Email, message = "The email was successfully verfied." });
                 }
 
                 // If Administrator was the one sending the mail, then the user will temporarily be signed in as admin.
@@ -253,6 +249,7 @@ namespace MVC_Identity.Controllers
             if (!string.IsNullOrWhiteSpace(message))
                 ViewBag.message = message;
 
+            //return PartialView("_SignInpartial");
             return View();
         }
 
@@ -266,6 +263,12 @@ namespace MVC_Identity.Controllers
                 return View();
             }
             var appUser = await _userManager.FindByNameAsync(user.Email);
+
+            if (appUser == null)
+            {
+                ViewBag.message = "The username or password was invalid.";
+                return PartialView("_SignInPartial");
+            }
 
             var result = await _signInManager.PasswordSignInAsync(appUser, user.Password, user.RememberMe, false);
 
