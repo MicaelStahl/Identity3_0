@@ -21,7 +21,7 @@ namespace BusinessLibrary.Repositories
             _emailSettings = emailSettings.Value;
         }
 
-        public Task<string> EmailVerificationMessage(string callbackUrl, HttpRequest Request, IUrlHelper Url)
+        public Task<string> EmailVerificationMessageAsync(string callbackUrl, HttpRequest Request, IUrlHelper Url)
         {
             try
             {

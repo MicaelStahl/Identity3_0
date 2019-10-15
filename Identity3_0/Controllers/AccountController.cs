@@ -45,10 +45,10 @@ namespace MVC_Identity.Controllers
         #region EmailValidation
 
         [AllowAnonymous]
-        public IActionResult CheckEmail(string email)
+        public async Task<IActionResult> CheckEmail(string email)
         {
-            if (string.IsNullOrWhiteSpace(email))
-                throw new ArgumentNullException(new IdentityErrorDescriber().DefaultError().Description);
+            if (await _userManager.FindByEmailAsync(email) == null)
+                throw new ArgumentNullException("Unexpected error occurred: The created user could not be found.");
 
             ViewBag.email = email;
 
@@ -61,45 +61,57 @@ namespace MVC_Identity.Controllers
         /// </summary>
         /// <param name="email">The email to send the mail to.</param>
         /// <returns></returns>
-        [HttpGet]
-        public async Task<IActionResult> SendEmailConfirmation(string email)
-        {
-            if (string.IsNullOrWhiteSpace(email))
-            {
-                ModelState.AddModelError(string.Empty, $"Unexpected error occurred: The email is blank.");
+        //[HttpGet]
+        //public async Task<IActionResult> SendEmailConfirmation(string email)
+        //{
+        //    if (string.IsNullOrWhiteSpace(email))
+        //    {
+        //        ModelState.AddModelError(string.Empty, $"Unexpected error occurred: The email is blank.");
 
-                return BadRequest(ModelState);
-            }
+        //        return BadRequest(ModelState);
+        //    }
 
-            var user = await _userManager.GetUserAsync(User);
+        //    var user = await _userManager.GetUserAsync(User);
 
-            if (user == null)
-            {
-                return NotFound("And error occurred: Could not find the active user.");
-            }
-            var userEmail = await _userManager.GetEmailAsync(user);
+        //    if (user == null)
+        //    {
+        //        return NotFound("And error occurred: Could not find the active user.");
+        //    }
+        //    var userEmail = await _userManager.GetEmailAsync(user);
 
-            if (userEmail != email)
-            {
-                var owner = await _userManager.FindByEmailAsync(email);
+        //    if (userEmail != email)
+        //    {
+        //        var owner = await _userManager.FindByEmailAsync(email);
 
-                if (owner != null && !string.Equals(await _userManager.GetUserIdAsync(owner), await _userManager.GetUserIdAsync(user)))
-                {
-                    ModelState.AddModelError(string.Empty, new IdentityErrorDescriber().DuplicateEmail(email).Description);
+        //        if (owner != null && !string.Equals(await _userManager.GetUserIdAsync(owner), await _userManager.GetUserIdAsync(user)))
+        //        {
+        //            ModelState.AddModelError(string.Empty, new IdentityErrorDescriber().DuplicateEmail(email).Description);
 
-                    return NotFound($"Cannot find the active user with the given Email of {email}.");
-                }
-            }
+        //            return NotFound($"Cannot find the active user with the given Email of {email}.");
+        //        }
+        //    }
 
-            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+        //    // Creates token for user
+        //    var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
 
-            var callbackUrl = Url.ActionLink(action: nameof(ConfirmEmail), controller: "Account", values: new { userId = user.Id, token }, protocol: Request.Scheme);
+        //    // Creates the url back to the application for the user with the given values
+        //    var callbackUrl = Url.Action(new UrlActionContext
+        //    {
+        //        Action = nameof(ConfirmEmail),
+        //        Controller = "Account",
+        //        Values = new { userId = user.Id, token },
+        //        Protocol = Request.Scheme = "https",
+        //        Host = "localhost:44351"
+        //    });
 
-            await _emailSender.SendEmailAsync(email, "Confirm your email",
-                    $"<h2>Email confirmation</h2><hr />Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+        //    // Creates a default message for the user.
+        //    var message = await _emailSender.EmailVerificationMessageAsync(callbackUrl, Request, Url);
 
-            return RedirectToAction(nameof(CheckEmail));
-        }
+        //    // Sends the email with the given parameters.
+        //    await _emailSender.SendEmailAsync(email, "Confirm your email", message);
+
+        //    return RedirectToAction(nameof(CheckEmail), new { email });
+        //}
 
         /// <summary>
         /// Only accessible for the active user. Aka the admin can't do this for other users.
@@ -116,7 +128,7 @@ namespace MVC_Identity.Controllers
 
             // Continue here https://www.codeproject.com/Articles/1272172/Require-Confirmed-Email-in-ASP-NET-Core-2-2-Part-1
 
-            var user = await _userManager.GetUserAsync(User);
+            var user = await _userManager.FindByEmailAsync(email);
 
             if (user == null)
             {
@@ -125,27 +137,28 @@ namespace MVC_Identity.Controllers
                 return BadRequest(ModelState);
             }
 
-            var userEmail = await _userManager.GetEmailAsync(user);
+            //var userEmail = await _userManager.GetEmailAsync(user);
 
-            if (userEmail != email)
-            {
-                var owner = await _userManager.FindByEmailAsync(email);
+            //if (userEmail != email)
+            //{
+            //    var owner = await _userManager.FindByEmailAsync(email);
 
-                if (owner != null && !string.Equals(await _userManager.GetUserIdAsync(owner),
-                                                    await _userManager.GetUserIdAsync(user)))
-                {
-                    ModelState.AddModelError(string.Empty,
-                        new IdentityErrorDescriber()
-                        .DuplicateEmail(email)
-                        .Description);
+            // Checks whether the email sent to the method is for the same user as the active user.
+            //    if (owner != null && !string.Equals(await _userManager.GetUserIdAsync(owner),
+            //                                        await _userManager.GetUserIdAsync(user)))
+            //    {
+            //        ModelState.AddModelError(string.Empty,
+            //            new IdentityErrorDescriber()
+            //            .DuplicateEmail(email)
+            //            .Description);
 
-                    // Return to Home screen
-                    return RedirectToAction(nameof(Index), "Home");
-                }
+            //        // Return to Home screen
+            //        return RedirectToAction(nameof(Index), "Home");
+            //    }
 
-                // Unsure if this is correct.
-                await _userManager.SetEmailAsync(user, email);
-            }
+            //    // Unsure if this is correct.
+            //    await _userManager.SetEmailAsync(user, email);
+            //}
 
             var result = await _userManager.UpdateSecurityStampAsync(user);
 
@@ -158,8 +171,10 @@ namespace MVC_Identity.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
+            // Generates a confirmationtoken for user.
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
 
+            // Generates the url inside the mail itself.
             var callbackUrl = Url.Action(new UrlActionContext
             {
                 Action = nameof(ConfirmEmail),
@@ -169,10 +184,13 @@ namespace MVC_Identity.Controllers
                 Host = "localhost:44351"
             });
 
-            await _emailSender.SendEmailAsync(email, "Confirm your email",
-                $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+            // The default message for the mail.
+            var message = await _emailSender.EmailVerificationMessageAsync(callbackUrl, Request, Url);
 
-            return RedirectToAction(nameof(CheckEmail));
+            // Sends the mail to the user.
+            await _emailSender.SendEmailAsync(email, "Confirm your email", message);
+
+            return RedirectToAction(nameof(CheckEmail), new { email });
         }
 
         [AllowAnonymous]
@@ -348,6 +366,7 @@ namespace MVC_Identity.Controllers
                         throw new InvalidOperationException("Unexpected error occured: Could not find the created user.");
                     }
 
+                    // Creates the url back to the application.
                     var callbackUrl = Url.Action(new UrlActionContext
                     {
                         Action = nameof(ConfirmEmail),
@@ -357,8 +376,10 @@ namespace MVC_Identity.Controllers
                         Host = "localhost:44351"
                     });
 
-                    var htmlMessage = await _emailSender.EmailVerificationMessage(callbackUrl, Request, Url);
+                    // Creates a default message for the user.
+                    var htmlMessage = await _emailSender.EmailVerificationMessageAsync(callbackUrl, Request, Url);
 
+                    // Sends the email with the given parameters.
                     await _emailSender.SendEmailAsync(createdUser.Email, "Confirm your email", htmlMessage);
 
                     // Checks if the IsAdmin value is true and adds the user to the administrator role if it is.
@@ -536,33 +557,118 @@ namespace MVC_Identity.Controllers
         {
             if (!ModelState.IsValid)
             {
-                ModelState.AddModelError(string.Empty, "Please fill all fields.");
+                ModelState.AddModelError(string.Empty, $"Unexpected error: Not all fields fulfilled the required format of {ModelState}.");
 
                 return View();
             }
 
             if (await _userManager.FindByEmailAsync(userEmail.OldEmail) == null)
             {
-                ModelState.AddModelError(userEmail.OldEmail, "The old email is not in use.");
+                ModelState.AddModelError(string.Empty, "Unexpected Error Occurred: No user exists with this email.");
+
+                ViewBag.error = $"Unexpected error occurred: Could not find user with the given email: {userEmail.OldEmail}.";
+
+                return View();
+            }
+
+            if (userEmail.OldEmail != User.Identity.Name)
+            {
+                ModelState.AddModelError(string.Empty, "Unexpected error occurred: Something went wrong.");
 
                 return View();
             }
 
             if (userEmail.OldEmail == userEmail.NewEmail)
             {
-                ModelState.AddModelError(string.Empty, "The new email can not be the same as the old one.");
+                ModelState.AddModelError(string.Empty, "Unexpected error occurred: The new email can not be the same as the old one.");
+
+                ViewBag.error = "Unexpected error occurred: The new email cannot be the same as the old one.";
 
                 return View();
             }
 
-            var result = await _userManager.GenerateChangeEmailTokenAsync(await _userManager.FindByEmailAsync(userEmail.OldEmail), userEmail.NewEmail);
-
-            if (string.IsNullOrWhiteSpace(result))
+            if (await _userManager.FindByEmailAsync(userEmail.NewEmail) != null)
             {
+                ModelState.AddModelError(string.Empty, new IdentityErrorDescriber().DuplicateEmail(userEmail.NewEmail).Description);
+
+                ViewBag.error = "Unexpected error occurred: Invalid email.";
+
+                return View();
             }
-            // Send email verification to the new email.
+
+            var token = await _userManager.GenerateChangeEmailTokenAsync(await _userManager.FindByEmailAsync(userEmail.OldEmail), userEmail.NewEmail);
+
+            if (string.IsNullOrWhiteSpace(token))
+            {
+                ModelState.AddModelError(string.Empty, new IdentityErrorDescriber().InvalidToken().Description);
+
+                ViewBag.error = "Unexpected error occurred: Could not token. Did you submit a valid email?";
+
+                return View();
+            }
+
+            var callbackUrl = Url.Action(new UrlActionContext
+            {
+                Action = nameof(VerifyEmailChangeTokenAsync),
+                Controller = "Account",
+                Values = new
+                {
+                    userId = await _userManager.GetUserIdAsync(await _userManager.FindByEmailAsync(userEmail.NewEmail)),
+                    email = userEmail.NewEmail,
+                    token
+                },
+                Protocol = Request.Scheme = "https",
+                Host = "localhost:44351"
+            });
+
+            var htmlMessage = await _emailSender.EmailVerificationMessageAsync(callbackUrl, Request, Url);
+
+            await _emailSender.SendEmailAsync(userEmail.NewEmail, "Confirm your email", htmlMessage);
 
             return View();
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> VerifyEmailChangeTokenAsync(string userId, string email, string token)
+        {
+            if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(email))
+            {
+                ModelState.AddModelError(string.Empty, "Unexpected error occurred: Something went wrong.");
+
+                return BadRequest(ModelState);
+            }
+
+            if (string.IsNullOrWhiteSpace(token))
+            {
+                ModelState.AddModelError(string.Empty, new IdentityErrorDescriber().InvalidToken().Description);
+
+                return BadRequest(ModelState); // change this later.
+            }
+
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user == null)
+            {
+                ModelState.AddModelError(string.Empty, $"Unexpected error occurred: Cannot find user with the given ID: {userId}");
+
+                return NotFound(ModelState);
+            }
+
+            var result = await _userManager.ChangeEmailAsync(user, email, token);
+
+            if (result.Succeeded)
+            {
+                return RedirectToAction(nameof(Profile), new { email, message = "The email was successfully confirmed" });
+            }
+            else
+            {
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+
+                return BadRequest(ModelState);
+            }
         }
 
         #endregion EditUserEmail

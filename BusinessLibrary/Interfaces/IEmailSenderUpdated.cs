@@ -15,6 +15,6 @@ namespace BusinessLibrary.Interfaces
         /// </summary>
         /// <param name="callbackUrl">The callbackUrl to use for the emailmessage.</param>
         /// <returns></returns>
-        Task<string> EmailVerificationMessage(string callbackUrl, HttpRequest Request, IUrlHelper Url);
+        Task<string> EmailVerificationMessageAsync(string callbackUrl, HttpRequest Request, IUrlHelper Url);
     }
 }
