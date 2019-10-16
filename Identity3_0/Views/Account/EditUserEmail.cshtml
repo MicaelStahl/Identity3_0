@@ -8,6 +8,12 @@
 <partial name="_GoBackButton" />
 
 <div class="col-3">
+
+    @if (ViewBag.error != null)
+    {
+        <div class="text-danger font-weight-bold updatedText">@ViewBag.error</div>
+    }
+
     <form asp-action="EditUserEmail" asp-controller="Account">
         <h1>Update email</h1>
         <hr />
@@ -16,13 +22,18 @@
         <div asp-validation-summary="ModelOnly" class="text-danger font-weight-bold"></div>
         <div class="form-group">
             <label asp-for="OldEmail"></label>
-            <input asp-for="OldEmail" value="@User.Identity.Name" placeholder="Old email" readonly />
+            <input class="form-control" asp-for="OldEmail" value="@Model.OldEmail" placeholder="Old email" readonly="readonly" />
             <span asp-validation-for="OldEmail" class="text-danger font-weight-bold"></span>
         </div>
         <div class="form-group">
             <label asp-for="NewEmail"></label>
-            <input asp-for="NewEmail" placeholder="New email" autofocus />
+            <input class="form-control" asp-for="NewEmail" placeholder="New email" autofocus />
             <span asp-validation-for="NewEmail" class="text-danger font-weight-bold"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="CompareEmail"></label>
+            <input class="form-control" asp-for="CompareEmail" placeholder="New email" autofocus />
+            <span asp-validation-for="CompareEmail" class="text-danger font-weight-bold"></span>
         </div>
         <div class="form-group">
             <input type="submit" value="Submit" class="btn btn-primary btn-sm" />

@@ -135,11 +135,12 @@ namespace DataAccessLibrary.ViewModels
 
     public class ChangeUserEmail
     {
-        [Required]
-        [EmailAddress]
-        [Display(Name = "Old Email")]
-        [DataType(DataType.EmailAddress)]
+        [Display(Name = "Current email")]
         public string OldEmail { get; set; }
+
+        [Required]
+        [Compare("NewEmail", ErrorMessage = "The emails do not match.")]
+        public string CompareEmail { get; set; }
 
         [Required]
         [EmailAddress]

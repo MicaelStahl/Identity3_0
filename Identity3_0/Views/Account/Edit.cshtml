@@ -7,48 +7,64 @@
 <hr />
 <partial name="_GoBackButton" />
 
-<div class="col-3 shadow border">
-    <form asp-action="Edit" asp-controller="Account" method="post">
-        <h1>Update information</h1>
-        <hr />
+<div>
+    <div class="col-3 float-left">
+        <form asp-action="Edit" asp-controller="Account" method="post">
+            <h1>Update information</h1>
+            <hr />
 
-        <div asp-validation-summary="ModelOnly" class="text-danger font-weight-bold col-12"></div>
-        @Html.AntiForgeryToken()
-        <input type="hidden" asp-for="Id" />
-        <div class="form-group">
-            <label class="control-label" asp-for="FirstName"></label>
-            <input class="form-control" asp-for="FirstName" placeholder="Firstname" autofocus />
-            <span class="text-danger font-weight-bold" asp-validation-for="FirstName"></span>
-        </div>
-        <div class="form-group">
-            <label class="control-label" asp-for="LastName"></label>
-            <input class="form-control" asp-for="LastName" placeholder="Lastname" />
-            <span class="text-danger font-weight-bold" asp-validation-for="LastName"></span>
-        </div>
-        <div class="form-group">
-            <label class="control-label" asp-for="Email"></label>
-            <input id="EmailRegistration" class="form-control" asp-for="Email" placeholder="Email" />
-            <span id="EmailRegistrationVali" class="text-danger font-weight-bold" asp-validation-for="Email"></span>
-        </div>
-        <div class="form-group">
-            <label class="control-label" asp-for="Age"></label>
-            <input class="form-control" asp-for="Age" placeholder="Age" />
-            <span class="text-danger font-weight-bold" asp-validation-for="Age"></span>
-        </div>
-        <div class="form-group">
-            <label class="control-label" asp-for="PhoneNumber"></label>
-            <input class="form-control" asp-for="PhoneNumber" placeholder="Phonenumber" />
-            <span class="text-danger font-weight-bold" asp-validation-for="PhoneNumber"></span>
-        </div>
-        @if (User.IsInRole("Administrator"))
-        {
+            <div asp-validation-summary="ModelOnly" class="text-danger font-weight-bold col-12"></div>
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="Id" />
             <div class="form-group">
-                <label class="control-label" asp-for="IsAdmin"></label>
-                <input class="form-inline" asp-for="IsAdmin" />
+                <label class="control-label" asp-for="FirstName"></label>
+                <input class="form-control" asp-for="FirstName" placeholder="Firstname" autofocus />
+                <span class="text-danger font-weight-bold" asp-validation-for="FirstName"></span>
             </div>
-        }
-        <div class="form-group">
-            <input id="registerSubmitBtn" type="submit" value="Submit" class="btn btn-primary btn-sm" />
+            <div class="form-group">
+                <label class="control-label" asp-for="LastName"></label>
+                <input class="form-control" asp-for="LastName" placeholder="Lastname" />
+                <span class="text-danger font-weight-bold" asp-validation-for="LastName"></span>
+            </div>
+            <div class="form-group">
+                <label class="control-label" asp-for="Email"></label>
+                <input id="EmailRegistration" class="form-control" asp-for="Email" placeholder="Email" />
+                <span id="EmailRegistrationVali" class="text-danger font-weight-bold" asp-validation-for="Email"></span>
+            </div>
+            <div class="form-group">
+                <label class="control-label" asp-for="Age"></label>
+                <input class="form-control" asp-for="Age" placeholder="Age" />
+                <span class="text-danger font-weight-bold" asp-validation-for="Age"></span>
+            </div>
+            <div class="form-group">
+                <label class="control-label" asp-for="PhoneNumber"></label>
+                <input class="form-control" asp-for="PhoneNumber" placeholder="Phonenumber" />
+                <span class="text-danger font-weight-bold" asp-validation-for="PhoneNumber"></span>
+            </div>
+            @if (User.IsInRole("Administrator"))
+            {
+                <div class="form-group">
+                    <label class="control-label" asp-for="IsAdmin"></label>
+                    <input class="form-inline" asp-for="IsAdmin" />
+                </div>
+            }
+            <div class="form-group">
+                <input id="registerSubmitBtn" type="submit" value="Submit" class="btn btn-primary btn-sm" />
+            </div>
+        </form>
+    </div>
+    <div class="col-2 float-left">
+        <h4>Options</h4>
+        <hr />
+        <div class="btn-group">
+            <ul class="list-unstyled">
+                <li>
+                    <a asp-action="EditUserEmail" asp-controller="Account" asp-route-email="@Model.Email">Edit Email</a>
+                </li>
+                <li>
+                    <a asp-action="EditUserPassword" asp-controller="Account" asp-route-id="@Model.Id">Edit Password</a>
+                </li>
+            </ul>
         </div>
-    </form>
+    </div>
 </div>

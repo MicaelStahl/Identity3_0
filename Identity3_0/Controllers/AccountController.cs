@@ -546,9 +546,9 @@ namespace MVC_Identity.Controllers
         #region EditUserEmail
 
         [HttpGet]
-        public IActionResult EditUserEmail()
+        public IActionResult EditUserEmail(string email)
         {
-            return View();
+            return View(new ChangeUserEmail { OldEmail = email });
         }
 
         [HttpPost]
