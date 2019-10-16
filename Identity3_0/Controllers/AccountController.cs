@@ -258,14 +258,162 @@ namespace MVC_Identity.Controllers
 
         #endregion EmailValidation
 
+        #region ForgottenPassword
+
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult ForgottenPassword()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ForgottenPassword(ForgottenUserPassword userPassword)
+        {
+            if (!ModelState.IsValid)
+            {
+                ModelState.AddModelError(string.Empty, $"Unexpected error occurred: the given email of: {userPassword.Email} is invalid.");
+
+                ViewBag.error = "Unexpected error occurred: The given email was invalid.";
+
+                return View();
+            }
+
+            var user = await _userManager.FindByEmailAsync(userPassword.Email);
+
+            if (user == null)
+            {
+                ModelState.AddModelError(string.Empty, $"Unexpected error: No user exists with the given email of: {userPassword.Email}.");
+
+                ViewBag.error = $"Could not find a user with the given email of {userPassword.Email}." +
+                    $"<br />" +
+                    $"If you do not have an account, then please click <a asp-action='Register' asp-controller='Account'>here</a>";
+
+                return View();
+            }
+
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+
+            // Url for the callback for the mail.
+            var callbackUrl = Url.Action(new UrlActionContext
+            {
+                Action = nameof(PasswordReset),
+                Controller = "Account",
+                Values = new { userId = user.Id, email = user.Email, token },
+                Protocol = Request.Scheme = "https",
+                Host = "localhost:44351"
+            });
+
+            // The message for the mail.
+            var htmlMessage = "<h2>Reset password</h2>" +
+                "<hr />" +
+                $"Click the link to reset your current password. <a href='{callbackUrl}'>Reset Password</a>" +
+                "<br /><br /><br />" +
+                "<em>If you didn't request this email, then please ignore this mail.</em>";
+
+            // Send mail.
+            await _emailSender.SendEmailAsync(user.Email, "Reset password", htmlMessage);
+
+            // Redirects to PasswordResetWait to indicate the mail was successfully sent.
+            return RedirectToAction(nameof(PasswordResetWait), new { email = user.Email });
+        }
+
+        /// <summary>
+        /// Method that will only ever be used after a user has requested a password reset.
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        [AllowAnonymous]
+        [Route("[controller]/Reset-Password")]
+        public IActionResult PasswordResetWait(string email)
+        {
+            ViewBag.email = email; // Only used if the user re-sends the password reset mail.
+            return View();
+        }
+
+        // NOTE: Create a RescendPasswordReset here later.
+
+        [HttpGet]
+        [AllowAnonymous]
+        [Route("[controller]/Password-Reset")]
+        public IActionResult PasswordReset(string userId, string email, string token)
+        {
+            return View(new PasswordResetting { UserId = userId, Email = email, Token = token });
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> PasswordReset(PasswordResetting reset)
+        {
+            if (string.IsNullOrWhiteSpace(reset.UserId) || string.IsNullOrWhiteSpace(reset.Email))
+            {
+                ModelState.AddModelError(string.Empty, "Something went wrong.");
+
+                return RedirectToAction(nameof(Index));
+            }
+
+            if (string.IsNullOrWhiteSpace(reset.Token))
+            {
+                ModelState.AddModelError(string.Empty, new IdentityErrorDescriber().InvalidToken().Description);
+
+                return RedirectToAction(nameof(Index));
+            }
+
+            if (reset.Password != reset.ConfirmPassword)
+            {
+                ModelState.AddModelError(string.Empty, new IdentityErrorDescriber().PasswordMismatch().Description);
+
+                return View(reset);
+            }
+
+            var user = await _userManager.FindByIdAsync(reset.UserId);
+
+            if (user == null)
+            {
+                ModelState.AddModelError(string.Empty, $"Unexpected error occurred: Could not find a user with the ID: {reset.UserId}.");
+
+                return BadRequest(ModelState);
+            }
+
+            if (user.Email != reset.Email)
+            {
+                ModelState.AddModelError(string.Empty, "Unexpected error occurred: Could not verify the user.");
+
+                return BadRequest(ModelState);
+            }
+            var result = await _userManager.ResetPasswordAsync(user, reset.Token, reset.Password);
+
+            if (result.Succeeded)
+            {
+                return RedirectToAction(nameof(SignIn), new { message = "Your password was successfully reset" });
+            }
+            else
+            {
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+
+                return BadRequest(ModelState);
+            }
+        }
+
+        #endregion ForgottenPassword
+
         #region SignIn / SignOut
 
         [HttpGet]
         [AllowAnonymous]
-        public IActionResult SignIn(string message = null)
+        public IActionResult SignIn(string message = null, string error = null)
         {
             if (!string.IsNullOrWhiteSpace(message))
                 ViewBag.message = message;
+
+            if (!string.IsNullOrWhiteSpace(error))
+                ViewBag.error = error;
 
             //return PartialView("_SignInpartial");
             return View();
@@ -284,7 +432,7 @@ namespace MVC_Identity.Controllers
 
             if (appUser == null)
             {
-                ViewBag.message = "The username or password was invalid.";
+                ViewBag.error = "The username or password was invalid.";
                 return PartialView("_SignInPartial");
             }
 
@@ -296,12 +444,12 @@ namespace MVC_Identity.Controllers
             }
             else if (result.IsLockedOut)
             {
-                ViewBag.message = "User is locked out. Please try again later.";
+                ViewBag.error = "User is locked out. Please try again later.";
                 return View();
             }
             else
             {
-                ViewBag.message = "Something went wrong. Please check your inputs then try again.";
+                ViewBag.error = "Invalid username or password.";
                 return View();
             }
         }
@@ -676,25 +824,9 @@ namespace MVC_Identity.Controllers
         #region EditUserPassword
 
         [HttpGet]
-        public async Task<IActionResult> EditUserPassword(string id)
+        public IActionResult EditUserPassword(string id)
         {
-            if (string.IsNullOrWhiteSpace(id))
-            {
-                ModelState.AddModelError(string.Empty, "Something went wrong.");
-
-                return BadRequest();
-            }
-
-            var user = await _userManager.FindByIdAsync(id);
-
-            if (user == null)
-            {
-                ModelState.AddModelError(string.Empty, "Could not find the requested user.");
-
-                return NotFound(ModelState);
-            }
-
-            ViewBag.Id = user.Id;
+            ViewBag.UserId = id;
 
             return View();
         }
@@ -712,16 +844,25 @@ namespace MVC_Identity.Controllers
 
             if (userPassword.OldPassword == userPassword.NewPassword)
             {
-                ModelState.AddModelError(string.Empty, "Cannot use the same password as a previous one.");
+                ModelState.AddModelError(userPassword.OldPassword, "Unexpected error occurred: The new and old password cannot match.");
 
                 return View(userPassword);
             }
 
-            var result = await _userManager.ChangePasswordAsync(await _userManager.FindByIdAsync(userPassword.Id), userPassword.OldPassword, userPassword.NewPassword);
+            var user = await _userManager.FindByIdAsync(userPassword.UserId);
+
+            if (user == null)
+            {
+                ModelState.AddModelError(string.Empty, $"Unexpected error occurred: Could not find user with ID: {userPassword.UserId}.");
+
+                return NotFound(ModelState);
+            }
+
+            var result = await _userManager.ChangePasswordAsync(user, userPassword.OldPassword, userPassword.NewPassword);
 
             if (result.Succeeded)
             {
-                return RedirectToAction(nameof(Profile), "Account", new { email = User.Identity.Name });
+                return RedirectToAction(nameof(Profile), "Account", new { email = user.Email });
             }
             else
             {

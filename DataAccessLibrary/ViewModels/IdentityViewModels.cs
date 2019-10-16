@@ -133,6 +133,9 @@ namespace DataAccessLibrary.ViewModels
         public List<string> Roles { get; set; } = new List<string>();
     }
 
+    /// <summary>
+    /// Viewmodel containing parameters for changing email.
+    /// </summary>
     public class ChangeUserEmail
     {
         [Display(Name = "Current email")]
@@ -149,14 +152,17 @@ namespace DataAccessLibrary.ViewModels
         public string NewEmail { get; set; }
     }
 
+    /// <summary>
+    /// Viewmodel containing parameters for changing passwords.
+    /// </summary>
     public class ChangeUserPassword
     {
         [Key]
-        public string Id { get; set; }
+        public string UserId { get; set; }
 
         [Required]
         [DataType(DataType.Password)]
-        [Display(Name = "Old password")]
+        [Display(Name = "New password")]
         [StringLength(20, MinimumLength = 8, ErrorMessage = "The password cannot exceed 20 characters nor be less than 8.")]
         public string OldPassword { get; set; }
 
@@ -170,5 +176,32 @@ namespace DataAccessLibrary.ViewModels
         [Compare("NewPassword")]
         [Display(Name = "Password confirmation")]
         public string PasswordConfirmation { get; set; }
+    }
+
+    public class ForgottenUserPassword
+    {
+        [Required]
+        [EmailAddress]
+        [DataType(DataType.EmailAddress)]
+        public string Email { get; set; }
+    }
+
+    public class PasswordResetting
+    {
+        public string UserId { get; set; }
+
+        public string Email { get; set; }
+
+        public string Token { get; set; }
+
+        [Required]
+        [DataType(DataType.Password)]
+        [Display(Name = "New password")]
+        public string Password { get; set; }
+
+        [Required]
+        [Compare("Password")]
+        [Display(Name = "Confirm password")]
+        public string ConfirmPassword { get; set; }
     }
 }
