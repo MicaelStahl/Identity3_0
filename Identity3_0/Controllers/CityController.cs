@@ -10,8 +10,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace MVC_Identity.Controllers
 {
-    [Route("World/[controller]/[action]")]
     [Authorize(Roles = "Administrator")]
+    [Route("World/[controller]/[action]")]
     public class CityController : Controller
     {
         #region D.I

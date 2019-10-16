@@ -31,7 +31,7 @@ namespace DataAccessLibrary.ViewModels
 
         public Dictionary<Guid, string> Countries { get; set; } = new Dictionary<Guid, string>();
 
-        public Guid CountryId { get; set; }
+        public Guid CountryId { get; set; } // Used as the asp-for="countryId" for dropdowns.
     }
 
     /// <summary>
@@ -54,6 +54,9 @@ namespace DataAccessLibrary.ViewModels
         public List<Guid> PeopleId { get; set; } = new List<Guid>();
     }
 
+    /// <summary>
+    /// Viewmodel to remove people from city.
+    /// </summary>
     public class RemovePeopleFromCity
     {
         public Guid CityId { get; set; }
