@@ -35,19 +35,24 @@ namespace Identity3_0
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // Creates the database.
             services.AddDbContext<Identity3_0DbContext>(options =>
             {
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
             });
 
+            // Scoped values, making dependency injection possible.
             services.AddScoped<IPersonRepository, PersonRepository>();
             services.AddScoped<ICityRepository, CityRepository>();
+            services.AddScoped<ICountryRepository, CountryRepository>();
             services.AddScoped<IGlobalRepository, GlobalRepository>();
             services.AddScoped<IAccountValidation, AccountValidation>();
             services.AddSingleton<IEmailSenderUpdated, EmailSender>();
 
+            // A tiny configuration allowing access to "EmailSettings" in appsettings.json.
             services.Configure<EmailSettings>(Configuration.GetSection("EmailSettings"));
 
+            // Adds identity to the application with unique emails.
             services.AddIdentity<AppUser, IdentityRole>(options =>
             {
                 options.User.RequireUniqueEmail = true;
@@ -55,18 +60,22 @@ namespace Identity3_0
                 .AddEntityFrameworkStores<Identity3_0DbContext>()
                 .AddDefaultTokenProviders();
 
+            // Makes it possible for frameworks to add this into their dependencies.
             services.AddDistributedMemoryCache();
+            // Creates a session on the application that lasts for 20 minutes.
             services.AddSession(options =>
             {
                 options.IdleTimeout = TimeSpan.FromMinutes(20);
             });
 
+            // Cookie configuration.
             services.Configure<CookiePolicyOptions>(options =>
             {
                 options.CheckConsentNeeded = context => true;
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
+            // Further cookie configurations.
             services.ConfigureApplicationCookie(options =>
             {
                 options.Cookie.HttpOnly = true;
@@ -80,6 +89,7 @@ namespace Identity3_0
                 options.SlidingExpiration = true;
             });
 
+            // Identity options that specifies length on password, lockout, unique email etc.
             services.Configure<IdentityOptions>(options =>
             {
                 options.Password.RequiredLength = 8;
@@ -88,15 +98,17 @@ namespace Identity3_0
                 options.Lockout.MaxFailedAccessAttempts = 5; // Default
                 options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5); // Default
 
-                options.User.AllowedUserNameCharacters = options.User.AllowedUserNameCharacters + "Â‰ˆ≈ƒ÷";
+                options.User.AllowedUserNameCharacters += "Â‰ˆ≈ƒ÷";
                 options.User.RequireUniqueEmail = true;
             });
 
+            // Hashes the password 200_000 times for security.
             services.Configure<PasswordHasherOptions>(options =>
             {
                 options.IterationCount = 200_000;
             });
 
+            // Adds Mvc services, a new JSonStringEnumConverter and sets the compatibility version.
             services.AddMvc()
                 .AddJsonOptions(options =>
                 {
@@ -130,11 +142,16 @@ namespace Identity3_0
 
             app.UseAuthorization();
 
+            // Adds several specific paths.
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
+                endpoints.MapControllerRoute(
+                    name: "Account",
+                    pattern: "{controller=Account/{action=Index}/{id?}"
+                    );
                 endpoints.MapControllerRoute(
                     name: "Person",
                     pattern: "World/{controller=Person}/{action=Index}/{id?}");
