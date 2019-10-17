@@ -1,0 +1,62 @@
+﻿@model Country
+@{
+    ViewData["Title"] = "Delete";
+}
+
+@{
+    // For a more dynamic feel for the user. This will make the details window wider if the list isn't null or empty.
+    string col = Model.Cities == null || Model.Cities.Count == 0 ? "col-3" : "col-4";
+}
+<h1>Delete @Model.Name?</h1>
+<hr />
+
+<div>
+    <partial name="_GoBackButton" />
+    <form class="float-right" asp-action="Delete" asp-controller="Country" asp-route-id="@Model.Id">
+        @Html.AntiForgeryToken()
+        <input value="Delete" type="submit" class="btn btn-danger ml-1" />
+    </form>
+    <div class="text-danger font-weight-bold float-right">Are you sure you want to delete @Model.Name?</div>
+</div>
+
+<div class="row">
+    <div class="shadow @col">
+        <div class="form-group">
+            <label class="font-weight-bold">Name</label>
+            <div class="form-inline">@Model.Name</div>
+        </div>
+        <div class="form-group">
+            <label class="font-weight-bold">Name</label>
+            <div class="form-inline">@Model.Population</div>
+        </div>
+        <div class="form-group">
+            <label class="font-weight-bold">Cities</label>
+            @if (Model.Cities == null || Model.Cities.Count == 0)
+            {
+                <div class="text-danger form-inline"><em>No cities exists in this country.</em></div>
+            }
+            else
+            {
+                <table class="table col-12 rounded">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Population</th>
+                            <th>Postal Code</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var city in Model.Cities)
+                        {
+                            <tr>
+                                <td>@city.Name</td>
+                                <td>@city.Population</td>
+                                <td>@city.PostalCode</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+</div>

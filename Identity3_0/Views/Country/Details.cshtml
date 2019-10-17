@@ -12,6 +12,11 @@
 <hr />
 <partial name="_GoBackButton" />
 
+@if (ViewBag.message != null)
+{
+    <div class="container text-success font-weight-bold updatedText">@ViewBag.message</div>
+}
+
 <div class="row">
     <div class="shadow @col">
 

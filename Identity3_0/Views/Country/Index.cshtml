@@ -9,20 +9,15 @@
 
 @if (ViewBag.message != null)
 {
-
-    <div class="container">
-        <p class="text-success font-weight-bold updatedText">@ViewBag.message</p>
-    </div>
+    <div class="text-success font-weight-bold updatedText">@ViewBag.message</div>
 }
 
 @if (ViewBag.error != null)
 {
-    <div class="container">
-        <p class="text-danger font-weight-bold updatedText">@ViewBag.error</p>
-    </div>
+    <div class="text-danger font-weight-bold updatedText">@ViewBag.error</div>
 }
 
-<div class="flex-fill">
+<div class="col-8">
 
     @if (Model != null || Model.Count != 0)
     {

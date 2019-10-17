@@ -23,7 +23,6 @@
                         <th class="d-table-cell">Email</th>
                         <th class="d-table-cell">E. confirmed</th>
                         <th class="d-table-cell">Phonenumber</th>
-                        <th class="d-table-cell">P. confirmed</th>
                         <th class="d-table-cell">Lockout end</th>
                         <th class="d-table-cell">Admin</th>
                         <th class="d-table-cell">Options</th>
@@ -34,11 +33,10 @@
                     {
                         var admin = user.IsAdmin ? "Yes" : "No";
                         var emailConfirmed = user.EmailConfirmed ? "Yes" : "No";
-                        var phoneConfirmed = user.PhoneNumberConfirmed ? "Yes" : "No";
 
                         <tr class="d-table-row">
                             @if (user.Email == User.Identity.Name)
-                            { // For fun
+                            { // Just a fun little thing that indicates who the active user is.
                                 <td class="d-table-cell">@user.FirstName @user.LastName <i class="fas fa-user"></i></td>
                             }
                             else
@@ -52,8 +50,6 @@
                             <td class="d-table-cell">@emailConfirmed</td>
 
                             <td class="d-table-cell">@user.PhoneNumber</td>
-
-                            <td class="d-table-cell">@phoneConfirmed</td>
 
                             @if (user.LockoutEnd == null)
                             {

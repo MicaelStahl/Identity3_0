@@ -1,25 +1,25 @@
-﻿@model AddCitiesToCountry
+﻿@model Country
 @{
-    ViewData["Title"] = $"Add Cities to {Model.Country.Value}";
+    ViewData["Title"] = $"Remove cities from {Model.Name}";
 }
 
-<h1>Add Cities To @Model.Country.Value</h1>
+<h1>Remove cities from @Model.Name</h1>
 <hr />
 <partial name="_GoBackButton" />
 
 @if (Model.Cities == null || Model.Cities.Count == 0)
 {
-    <div>Unexpected error occurred: Could not load any cities not belonging to @Model.Country.Value.</div>
+    <div class="text-danger"><em>No cities exists in this country.</em></div>
 }
 else
 {
     <div class="col-8 shadow">
-        <h3>Add cities to @Model.Country.Value</h3>
+        <h3>Remove cities from @Model.Name</h3>
 
         <form asp-action="AddCitiesToCountry" asp-controller="Country" class="p-2">
             @Html.AntiForgeryToken()
 
-            <input type="hidden" value="@Model.Country.Key" name="CountryId" />
+            <input type="hidden" value="@Model.Id" name="CountryId" />
             <div class="form-group">
                 <table class="table table-hover table-active table-striped rounded">
                     <thead>
@@ -28,19 +28,16 @@ else
                             <th>Name</th>
                             <th>Population</th>
                             <th>Postal Code</th>
-                            <th>Current city</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach (var city in Model.Cities)
                         {
-                            var country = city.Country == null ? "None" : city.Country.Name;
                             <tr>
                                 <td><input type="checkbox" name="CitiesId" value="@city.Id" /></td>
                                 <td>@city.Name</td>
                                 <td>@city.Population</td>
                                 <td>@city.PostalCode</td>
-                                <td>@country</td>
                             </tr>
                         }
                     </tbody>

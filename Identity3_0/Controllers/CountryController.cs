@@ -97,8 +97,7 @@ namespace MVC_Identity.Controllers
         #region Find
 
         [HttpGet]
-        [Route("World/[controller]/Details")]
-        public async Task<IActionResult> Details(Guid id)
+        public async Task<IActionResult> Details(Guid id, string message = null)
         {
             if (id == Guid.Empty)
             {
@@ -111,6 +110,9 @@ namespace MVC_Identity.Controllers
 
             if (result.Message == ActionMessages.Success)
             {
+                if (!string.IsNullOrWhiteSpace(message))
+                    ViewBag.message = message;
+
                 return View(result.Country);
             }
             else if (result.Message == ActionMessages.NotFound)
@@ -199,7 +201,6 @@ namespace MVC_Identity.Controllers
         #region AddCities
 
         [HttpGet]
-        [Route("[controller]/Add-Cities-To-Country")]
         public async Task<IActionResult> AddCitiesToCountry(Guid id)
         {
             if (id == Guid.Empty)
@@ -242,7 +243,9 @@ namespace MVC_Identity.Controllers
 
             if (result.Message == ActionMessages.Updated)
             {
-                return RedirectToAction(nameof(Details), new { id = result.Country.Id, message = $"The requested cities were successfully added to {result.Country.Name}." });
+                var cities = country.CitiesId.Count > 1 ? "cities" : "city";
+
+                return RedirectToAction(nameof(Details), new { id = result.Country.Id, message = $"The requested {cities} were successfully added to {result.Country.Name}." });
             }
             else if (result.Message == ActionMessages.NotFound)
             {
@@ -307,7 +310,9 @@ namespace MVC_Identity.Controllers
 
             if (result.Message == ActionMessages.Updated)
             {
-                return RedirectToAction(nameof(Details), new { id = result.Country.Id, message = $"The requested cities were successfully removed from {result.Country.Name}." });
+                var cities = country.CitiesId.Count > 1 ? "cities" : "city";
+
+                return RedirectToAction(nameof(Details), new { id = result.Country.Id, message = $"The requested {cities} were successfully removed from {result.Country.Name}." });
             }
             else if (result.Message == ActionMessages.NotFound)
             {

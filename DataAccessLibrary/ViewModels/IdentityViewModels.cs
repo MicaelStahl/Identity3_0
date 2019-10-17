@@ -178,6 +178,9 @@ namespace DataAccessLibrary.ViewModels
         public string PasswordConfirmation { get; set; }
     }
 
+    /// <summary>
+    /// Class containing an Email for easier validation.
+    /// </summary>
     public class ForgottenUserPassword
     {
         [Required]
@@ -186,6 +189,9 @@ namespace DataAccessLibrary.ViewModels
         public string Email { get; set; }
     }
 
+    /// <summary>
+    /// Class used for resetting passwords.
+    /// </summary>
     public class PasswordResetting
     {
         public string UserId { get; set; }
