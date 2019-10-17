@@ -9,12 +9,26 @@ namespace BusinessLibrary.Interfaces
 {
     public interface IGlobalRepository
     {
+        #region People related
+
         Task<List<Person>> GetPeople();
+
+        #endregion People related
+
+        #region City related
 
         Task<Dictionary<Guid, string>> GetCities();
 
+        Task<List<Person>> PeopleNotInCity(City city);
+
+        #endregion City related
+
+        #region Country related
+
+        Task<List<City>> GetCityList(Country country);
+
         Task<Dictionary<Guid, string>> GetCountries();
 
-        Task<List<Person>> PeopleNotInCity(City city);
+        #endregion Country related
     }
 }

@@ -31,17 +31,28 @@ if ($(".updatedText").val() !== null) {
     setTimeout(() => $(".updatedText").fadeOut(), 3000)
 }
 
-//$("#signInBtn").click(function () {
-//    $.ajax({
-//        url: "/Account/SignIn",
-//        method: "GET"
-//    }).done(function (result) {
-//        console.log(result);
-//        document.body.innerHTML = result;
-//        const options = { "backdrop": "static", keyboard: true };
-//        $("#signInModal").modal(options);
-//        $("#signInModal").modal("show");
-//    }).catch(function (err) {
-//        console.error(err);
-//    })
-//})
+/*
+ * Easy way of showing Modals whenever wanted.
+ * This specific one shows a modal for 3 seconds, before hiding it again.
+ * Useful when something was removed, updated, created etc.
+*/
+if ($(".updatedModalValue").val() !== null) {
+    const options = { "backdrop": "static", keyboard: true };
+
+    $(".updatedModal").modal(options)
+
+    $(".updatedModal").modal("show")
+
+    setTimeout(() => $(".updatedModal").modal("hide"), 3000)
+}
+
+/*
+ * Easy way of showing Modals whenever wanted.
+*/
+if ($(".<insert modal-class name here>").val() !== null) {
+    const options = { "backdrop": "static", keyboard: true };
+
+    $(".<insert modal-class name here>").modal(options)
+
+    $(".<insert modal-class name here>").modal("show")
+}

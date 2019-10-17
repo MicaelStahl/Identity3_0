@@ -35,48 +35,23 @@ namespace MVC_Identity.Controllers
             if (!string.IsNullOrWhiteSpace(error))
                 ViewBag.error = error;
 
-            return View(await _service.FindAll());
-        }
+            var result = await _service.FindAll();
 
-        #region GetOneCountry
-
-        /// <summary>
-        /// A method used for all methods apart from "Find" that wants to get one user.
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        [HttpGet]
-        protected internal async Task<Country> GetOneCountry(Guid id)
-        {
-            try
+            if (result.Message == ActionMessages.Success)
             {
-                if (id == null)
-                {
-                    throw new Exception("Something went wrong.");
-                }
-
-                var result = await _service.Find(id);
-
-                if (result.Message == ActionMessages.Success)
-                {
-                    return result.Country;
-                }
-                else if (result.Message == ActionMessages.NotFound)
-                {
-                    throw new Exception($"No country was found with the given ID: {id}");
-                }
-                else
-                {
-                    throw new Exception();
-                }
+                return View(result.Countries);
             }
-            catch (Exception ex)
+            else if (result.Message == ActionMessages.Empty)
             {
-                throw new NullReferenceException(ex.Message, ex.InnerException);
+                ViewBag.error = "No countries were found. Please update your page if this is incorrect.";
+
+                return View();
+            }
+            else
+            {
+                return BadRequest();
             }
         }
-
-        #endregion GetOneCountry
 
         #region Create
 
@@ -88,7 +63,7 @@ namespace MVC_Identity.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Country country)
+        public async Task<IActionResult> Create([FromForm]Country country)
         {
             if (!ModelState.IsValid)
             {
@@ -111,6 +86,8 @@ namespace MVC_Identity.Controllers
             }
             else
             {
+                ModelState.AddModelError(string.Empty, "Unexpected error: The action failed.");
+
                 return BadRequest(ModelState);
             }
         }
@@ -120,7 +97,8 @@ namespace MVC_Identity.Controllers
         #region Find
 
         [HttpGet]
-        public async Task<IActionResult> Find(Guid id, string redirectUrl = null)
+        [Route("World/[controller]/Details")]
+        public async Task<IActionResult> Details(Guid id)
         {
             if (id == Guid.Empty)
             {
@@ -132,10 +110,7 @@ namespace MVC_Identity.Controllers
             var result = await _service.Find(id);
 
             if (result.Message == ActionMessages.Success)
-            { // If this redirectUrl string isn't null, it then redirects to that given string.
-                if (!string.IsNullOrWhiteSpace(redirectUrl))
-                    return RedirectToAction(redirectUrl, new { country = result.Country });
-
+            {
                 return View(result.Country);
             }
             else if (result.Message == ActionMessages.NotFound)
@@ -146,6 +121,8 @@ namespace MVC_Identity.Controllers
             }
             else
             {
+                ModelState.AddModelError(string.Empty, "Unexpected error: The action failed.");
+
                 return BadRequest(ModelState);
             }
         }
@@ -166,21 +143,29 @@ namespace MVC_Identity.Controllers
                 return RedirectToAction(nameof(Index), new { message = string.Empty, error = "Unexpected error occurred: The ID was blank." });
             }
 
-            var result = await GetOneCountry(id);
+            var result = await _service.Find(id);
 
-            if (result == null)
+            if (result.Message == ActionMessages.Success)
             {
-                ModelState.AddModelError(string.Empty, "Something went wrong when fetching country");
+                return View(result.Country);
+            }
+            else if (result.Message == ActionMessages.NotFound)
+            {
+                ModelState.AddModelError(string.Empty, $"Unexpected error: No country was found with the ID: {id}");
+
+                return NotFound(ModelState);
+            }
+            else
+            {
+                ModelState.AddModelError(string.Empty, "Unexpected error: The action failed.");
 
                 return BadRequest(ModelState);
             }
-
-            return View(result);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Country country)
+        public async Task<IActionResult> Edit([FromForm]Country country)
         {
             if (!ModelState.IsValid)
             {
@@ -193,7 +178,7 @@ namespace MVC_Identity.Controllers
 
             if (result.Message == ActionMessages.Updated)
             {
-                return RedirectToAction(nameof(Find), new { message = $"{result.Country.Name} was successfully updated." });
+                return RedirectToAction(nameof(Details), new { message = $"{result.Country.Name} was successfully updated." });
             }
             else if (result.Message == ActionMessages.NotFound)
             {
@@ -203,12 +188,204 @@ namespace MVC_Identity.Controllers
             }
             else
             {
+                ModelState.AddModelError(string.Empty, "Unexpected error: The action failed.");
+
                 return BadRequest(ModelState);
             }
         }
 
         #endregion Edit
 
+        #region AddCities
+
+        [HttpGet]
+        [Route("[controller]/Add-Cities-To-Country")]
+        public async Task<IActionResult> AddCitiesToCountry(Guid id)
+        {
+            if (id == Guid.Empty)
+            {
+                ModelState.AddModelError(string.Empty, "Unexpected error occurred: The ID was blank.");
+
+                return BadRequest(new NullReferenceException("Unexpected error occurred: The ID was blank.").Message);
+            }
+
+            var country = await _service.Find(id);
+
+            if (country.Message == ActionMessages.Success)
+            {
+                return View(new AddCitiesToCountry { Cities = await _list.GetCityList(country.Country), Country = new KeyValuePair<Guid, string>(country.Country.Id, country.Country.Name) });
+            }
+            else if (country.Message == ActionMessages.NotFound)
+            {
+                return RedirectToAction(nameof(Index), new { message = string.Empty, error = $"No country was found with ID: {id}" });
+            }
+            else
+            {
+                ModelState.AddModelError(string.Empty, "Unexpected error: The action failed.");
+
+                return BadRequest(ModelState);
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddCitiesToCountry([FromForm]AddCitiesToCountryVM country)
+        {
+            if (country.CountryId == Guid.Empty)
+            {
+                ModelState.AddModelError(string.Empty, "Unexpected error occurred: The ID was blank.");
+
+                return BadRequest(ModelState);
+            }
+
+            var result = await _service.AddCitiesToCountry(country);
+
+            if (result.Message == ActionMessages.Updated)
+            {
+                return RedirectToAction(nameof(Details), new { id = result.Country.Id, message = $"The requested cities were successfully added to {result.Country.Name}." });
+            }
+            else if (result.Message == ActionMessages.NotFound)
+            {
+                ModelState.AddModelError(string.Empty, $"Unexpected error occurred: Could not find any country with the ID: {country.CountryId}");
+
+                return NotFound(ModelState);
+            }
+            else
+            {
+                ModelState.AddModelError(string.Empty, $"Something unexpected happened. The requested action: {result.Message.ToString()}");
+
+                return BadRequest(ModelState);
+            }
+        }
+
+        #endregion AddCities
+
+        #region RemoveCities
+
+        [HttpGet]
+        public async Task<IActionResult> RemoveCitiesFromCountry(Guid id)
+        {
+            if (id == Guid.Empty)
+            {
+                ModelState.AddModelError(string.Empty, "Unexpected error occurred: The ID was blank.");
+
+                return BadRequest(ModelState);
+            }
+
+            var result = await _service.Find(id);
+
+            if (result.Message == ActionMessages.Success)
+            {
+                return View(result.Country);
+            }
+            else if (result.Message == ActionMessages.NotFound)
+            {
+                ModelState.AddModelError(string.Empty, $"Not country was found with ID: {id}.");
+
+                return NotFound(ModelState);
+            }
+            else
+            {
+                ModelState.AddModelError(string.Empty, $"Unexpected error occurred: The action {result.Message.ToString()}.");
+
+                return BadRequest(ModelState);
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RemoveCitiesFromCountry([FromForm]RemoveCitiesFromCountryVM country)
+        {
+            if (country.CountryId == Guid.Empty)
+            {
+                ModelState.AddModelError(string.Empty, "Unexpected error occurred: The ID was blank.");
+
+                return BadRequest(ModelState);
+            }
+
+            var result = await _service.RemoveCitiesFromCountry(country);
+
+            if (result.Message == ActionMessages.Updated)
+            {
+                return RedirectToAction(nameof(Details), new { id = result.Country.Id, message = $"The requested cities were successfully removed from {result.Country.Name}." });
+            }
+            else if (result.Message == ActionMessages.NotFound)
+            {
+                ModelState.AddModelError(string.Empty, $"Not country was found with ID: {country.CountryId}.");
+
+                return NotFound(ModelState);
+            }
+            else
+            {
+                ModelState.AddModelError(string.Empty, $"Unexpected error occurred: The action {result.Message.ToString()}.");
+
+                return BadRequest(ModelState);
+            }
+        }
+
+        #endregion RemoveCities
+
         #endregion Edit - Section
+
+        #region Delete
+
+        [HttpGet]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            if (id == Guid.Empty)
+            {
+                ModelState.AddModelError(string.Empty, "Unexpected error occurred: The ID was blank.");
+
+                return BadRequest(ModelState);
+            }
+
+            var country = await _service.Find(id);
+
+            if (country.Message == ActionMessages.Success)
+            {
+                return View(country.Country);
+            }
+            else if (country.Message == ActionMessages.NotFound)
+            {
+                return RedirectToAction(nameof(Index), new { message = string.Empty, error = $"No country with ID: {id} was found." });
+            }
+            else
+            {
+                ModelState.AddModelError(string.Empty, "Unexpected error: The action failed.");
+
+                return BadRequest(ModelState);
+            }
+        }
+
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(Guid id)
+        {
+            if (id == Guid.Empty)
+            {
+                ModelState.AddModelError(string.Empty, "Unexpected error occurred: The ID was blank.");
+
+                return BadRequest(ModelState);
+            }
+
+            var result = await _service.Delete(id);
+
+            if (result == ActionMessages.Deleted)
+            {
+                return RedirectToAction(nameof(Index), new { message = "The requested country was successfully removed." });
+            }
+            else if (result == ActionMessages.NotFound)
+            {
+                return RedirectToAction(nameof(Index), new { message = string.Empty, error = "The requested country could not be found. Please update your page and try again." });
+            }
+            else
+            {
+                ModelState.AddModelError(string.Empty, "Unexpected error: The action failed.");
+
+                return BadRequest(ModelState);
+            }
+        }
+
+        #endregion Delete
     }
 }
