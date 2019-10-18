@@ -9,23 +9,23 @@
 <div class="d-block">
     <div class="col-12 shadow border">
         @if (Model == null || Model.Count == 0)
-        {
+        { // This is mostly as a check so that it won't throw an exception for trying to do anything with null values.
             <div class="text-info">No users could be found. If this is incorrect, please update the page or contact admin.</div>
         }
         else
         {
-            <table class="table d-table table-active table-striped table-hover rounded table-responsive flex-wrap overflow-auto small">
+            <table class="table table-active table-striped table-hover rounded table-responsive flex-wrap overflow-auto small">
                 <caption>All users</caption>
                 <thead>
-                    <tr class="d-table-row">
-                        <th class="d-table-cell">Name</th>
-                        <th class="d-table-cell">Age</th>
-                        <th class="d-table-cell">Email</th>
-                        <th class="d-table-cell">E. confirmed</th>
-                        <th class="d-table-cell">Phonenumber</th>
-                        <th class="d-table-cell">Lockout end</th>
-                        <th class="d-table-cell">Admin</th>
-                        <th class="d-table-cell">Options</th>
+                    <tr>
+                        <th>Name</th>
+                        <th>Age</th>
+                        <th>Email</th>
+                        <th>E. confirmed</th>
+                        <th>Phonenumber</th>
+                        <th>Lockout end</th>
+                        <th>Admin</th>
+                        <th>Options</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -34,35 +34,34 @@
                         var admin = user.IsAdmin ? "Yes" : "No";
                         var emailConfirmed = user.EmailConfirmed ? "Yes" : "No";
 
-                        <tr class="d-table-row">
+                        <tr>
                             @if (user.Email == User.Identity.Name)
                             { // Just a fun little thing that indicates who the active user is.
-                                <td class="d-table-cell">@user.FirstName @user.LastName <i class="fas fa-user"></i></td>
+                                <td>@user.FirstName @user.LastName <i class="fas fa-user"></i></td>
                             }
                             else
                             {
-                                <td class="d-table-cell">@user.FirstName @user.LastName</td>
                             }
-                            <td class="d-table-cell">@user.Age</td>
+                            <td>@user.Age</td>
 
-                            <td class="d-table-cell">@user.Email</td>
+                            <td>@user.Email</td>
 
-                            <td class="d-table-cell">@emailConfirmed</td>
+                            <td>@emailConfirmed</td>
 
-                            <td class="d-table-cell">@user.PhoneNumber</td>
+                            <td>@user.PhoneNumber</td>
 
                             @if (user.LockoutEnd == null)
                             {
-                                <td class="d-table-cell">Not locked out</td>
+                                <td>Not locked out</td>
                             }
                             else
                             {
-                                <td class="d-table-cell">@user.LockoutEnd</td>
+                                <td>@user.LockoutEnd</td>
                             }
 
-                            <td class="d-table-cell">@admin</td>
+                            <td>@admin</td>
 
-                            <td class="d-table-cell">
+                            <td>
                                 <a asp-action="Edit" asp-route-id="@user.Id"><i class="fas fa-edit"></i></a>
                                 <a asp-action="Profile" asp-route-email="@user.Email"><i class="fas fa-info-circle"></i></a>
                                 <a asp-action="Delete" asp-route-id="@user.Id"><i class="far fa-window-close"></i></a>

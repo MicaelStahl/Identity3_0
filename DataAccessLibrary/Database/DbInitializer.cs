@@ -43,6 +43,7 @@ namespace DataAccessLibrary
                     LastName = "Administrator",
                     Age = 29,
                     Email = "Admin.Administrator@context.com", // Used for signing in.
+                    EmailConfirmed = true,
                     PhoneNumber = "123456789",
                     IsAdmin = true
                 };
@@ -66,6 +67,7 @@ namespace DataAccessLibrary
                     LastName = "User",
                     Age = 20,
                     Email = "NormalUser@context.com", // Used for signing in.
+                    EmailConfirmed = true,
                     PhoneNumber = "123456789",
                     IsAdmin = false
                 };

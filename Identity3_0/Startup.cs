@@ -55,7 +55,8 @@ namespace Identity3_0
             // Adds identity to the application with unique emails.
             services.AddIdentity<AppUser, IdentityRole>(options =>
             {
-                options.User.RequireUniqueEmail = true;
+                options.User.RequireUniqueEmail = true; // Indicates that there cannot exist 2 users that has the same email.
+                options.SignIn.RequireConfirmedEmail = false; // Change this to 'true' if you want this application to require a confirmed email to login.
             })
                 .AddEntityFrameworkStores<Identity3_0DbContext>()
                 .AddDefaultTokenProviders();
@@ -121,6 +122,11 @@ namespace Identity3_0
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseRequestLocalization(options =>
+            {
+                options.AddSupportedCultures("sv-se");
+            });
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

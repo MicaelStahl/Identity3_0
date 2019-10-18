@@ -44,6 +44,7 @@ namespace MVC_Identity.Controllers
 
         #region EmailValidation
 
+        [HttpGet]
         [AllowAnonymous]
         public async Task<IActionResult> CheckEmail(string email)
         {
@@ -56,67 +57,10 @@ namespace MVC_Identity.Controllers
         }
 
         /// <summary>
-        /// Only accessible for the active user. Used after registration if the registered user isn't an admin.
-        /// NOTE: MIGHT NOT BE USED AT ALL
-        /// </summary>
-        /// <param name="email">The email to send the mail to.</param>
-        /// <returns></returns>
-        //[HttpGet]
-        //public async Task<IActionResult> SendEmailConfirmation(string email)
-        //{
-        //    if (string.IsNullOrWhiteSpace(email))
-        //    {
-        //        ModelState.AddModelError(string.Empty, $"Unexpected error occurred: The email is blank.");
-
-        //        return BadRequest(ModelState);
-        //    }
-
-        //    var user = await _userManager.GetUserAsync(User);
-
-        //    if (user == null)
-        //    {
-        //        return NotFound("And error occurred: Could not find the active user.");
-        //    }
-        //    var userEmail = await _userManager.GetEmailAsync(user);
-
-        //    if (userEmail != email)
-        //    {
-        //        var owner = await _userManager.FindByEmailAsync(email);
-
-        //        if (owner != null && !string.Equals(await _userManager.GetUserIdAsync(owner), await _userManager.GetUserIdAsync(user)))
-        //        {
-        //            ModelState.AddModelError(string.Empty, new IdentityErrorDescriber().DuplicateEmail(email).Description);
-
-        //            return NotFound($"Cannot find the active user with the given Email of {email}.");
-        //        }
-        //    }
-
-        //    // Creates token for user
-        //    var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-
-        //    // Creates the url back to the application for the user with the given values
-        //    var callbackUrl = Url.Action(new UrlActionContext
-        //    {
-        //        Action = nameof(ConfirmEmail),
-        //        Controller = "Account",
-        //        Values = new { userId = user.Id, token },
-        //        Protocol = Request.Scheme = "https",
-        //        Host = "localhost:44351"
-        //    });
-
-        //    // Creates a default message for the user.
-        //    var message = await _emailSender.EmailVerificationMessageAsync(callbackUrl, Request, Url);
-
-        //    // Sends the email with the given parameters.
-        //    await _emailSender.SendEmailAsync(email, "Confirm your email", message);
-
-        //    return RedirectToAction(nameof(CheckEmail), new { email });
-        //}
-
-        /// <summary>
         /// Only accessible for the active user. Aka the admin can't do this for other users.
         /// </summary>
-        [HttpPost]
+        [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> ResendEmailVerification(string email)
         {
             if (string.IsNullOrWhiteSpace(email))
@@ -126,8 +70,6 @@ namespace MVC_Identity.Controllers
                 return BadRequest(ModelState); // Change this sometime.
             }
 
-            // Continue here https://www.codeproject.com/Articles/1272172/Require-Confirmed-Email-in-ASP-NET-Core-2-2-Part-1
-
             var user = await _userManager.FindByEmailAsync(email);
 
             if (user == null)
@@ -136,29 +78,6 @@ namespace MVC_Identity.Controllers
 
                 return BadRequest(ModelState);
             }
-
-            //var userEmail = await _userManager.GetEmailAsync(user);
-
-            //if (userEmail != email)
-            //{
-            //    var owner = await _userManager.FindByEmailAsync(email);
-
-            // Checks whether the email sent to the method is for the same user as the active user.
-            //    if (owner != null && !string.Equals(await _userManager.GetUserIdAsync(owner),
-            //                                        await _userManager.GetUserIdAsync(user)))
-            //    {
-            //        ModelState.AddModelError(string.Empty,
-            //            new IdentityErrorDescriber()
-            //            .DuplicateEmail(email)
-            //            .Description);
-
-            //        // Return to Home screen
-            //        return RedirectToAction(nameof(Index), "Home");
-            //    }
-
-            //    // Unsure if this is correct.
-            //    await _userManager.SetEmailAsync(user, email);
-            //}
 
             var result = await _userManager.UpdateSecurityStampAsync(user);
 
@@ -241,18 +160,19 @@ namespace MVC_Identity.Controllers
             }
             else
             {
-                // Redirect to login if the user is not signed in.
+                // Redirect to profile if the user is signed in.
+                // Don't know if this will ever be used.
                 if (User.Identity.IsAuthenticated && !User.IsInRole("Administrator"))
                 {
-                    return RedirectToAction(nameof(Profile), new { email = user.Email, message = "The email was successfully verfied." });
+                    return RedirectToAction(nameof(Profile), new { email = user.Email, message = "The email was successfully verified." });
                 }
 
-                // If Administrator was the one sending the mail, then the user will temporarily be signed in as admin.
+                // If Administrator was the one sending the mail, then the user will temporarily be signed in as admin. ??
                 // This is to stop that.
                 if (User.IsInRole("Administrator"))
                     await _signInManager.SignOutAsync();
 
-                return RedirectToAction(nameof(SignIn));
+                return RedirectToAction(nameof(SignIn), new { message = "Your email was successfully verified!" });
             }
         }
 
@@ -289,7 +209,7 @@ namespace MVC_Identity.Controllers
 
                 ViewBag.error = $"Could not find a user with the given email of {userPassword.Email}." +
                     $"<br />" +
-                    $"If you do not have an account, then please click <a asp-action='Register' asp-controller='Account'>here</a>";
+                    $"If you do not have an account, then please click <a asp-action='Register' asp-controller='Account'>here</a> to register.";
 
                 return View();
             }
@@ -311,7 +231,7 @@ namespace MVC_Identity.Controllers
                 "<hr />" +
                 $"Click the link to reset your current password. <a href='{callbackUrl}'>Reset Password</a>" +
                 "<br /><br /><br />" +
-                "<em>If you didn't request this email, then please ignore this mail.</em>";
+                "<em>If you did not request this email, then please ignore this mail.</em>";
 
             // Send mail.
             await _emailSender.SendEmailAsync(user.Email, "Reset password", htmlMessage);
@@ -346,6 +266,7 @@ namespace MVC_Identity.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
+        [Route("[controller]/Password-Reset")]
         public async Task<IActionResult> PasswordReset(PasswordResetting reset)
         {
             if (string.IsNullOrWhiteSpace(reset.UserId) || string.IsNullOrWhiteSpace(reset.Email))
@@ -388,7 +309,20 @@ namespace MVC_Identity.Controllers
 
             if (result.Succeeded)
             {
-                return RedirectToAction(nameof(SignIn), new { message = "Your password was successfully reset" });
+                var securityStampResult = await _userManager.UpdateSecurityStampAsync(user);
+
+                if (!securityStampResult.Succeeded)
+                {
+                    foreach (var error in securityStampResult.Errors)
+                    {
+                        ModelState.AddModelError(string.Empty, error.Description);
+                    }
+
+                    // Redirects to the error page if something were to go wrong.
+                    return RedirectToAction("Error", "Home");
+                }
+
+                return RedirectToAction(nameof(SignIn), new { message = "Your password was successfully reset, please try to sign in with your new password." });
             }
             else
             {
@@ -541,7 +475,7 @@ namespace MVC_Identity.Controllers
                         return RedirectToAction(nameof(Register), new { created = true }); // Allows the admin to create more users.
                     }
 
-                    return RedirectToAction(nameof(CheckEmail)); // Redirect to CheckEmail so user will feel implied to verify the email.
+                    return RedirectToAction(nameof(CheckEmail), new { email = user.Email }); // Redirect to CheckEmail so user will feel implied to verify the email.
                 }
                 else
                 {
@@ -633,7 +567,7 @@ namespace MVC_Identity.Controllers
         /// <summary>
         /// Expand this Edit to be more dynamic for specifically Email, Password etc.
         /// </summary>
-        /// <param name="user"></param>
+        /// <param name="user">The data to update the user with.</param>
         /// <returns></returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -658,7 +592,7 @@ namespace MVC_Identity.Controllers
             original.FirstName = user.FirstName;
             original.LastName = user.LastName;
             original.Age = user.Age;
-            original.Email = user.Email;
+            //original.Email = user.Email; // Not used in this method.
             original.PhoneNumber = user.Email;
 
             // Using Discard " _ " to make this expression a possibility.
